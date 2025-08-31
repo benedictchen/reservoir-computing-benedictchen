@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "reservoir-computing-benedictchen"
-version = "1.0.0"
+version = "1.1.0"
 description = "Echo State Networks and Liquid State Machines - Revolutionary temporal processing without training recurrent weights"
 readme = "README.md"
 license = {text = "Custom Non-Commercial License with Donation Requirements"}
@@ -67,7 +67,7 @@ dev = [
 Funding = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS"
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "1.1.0"
 addopts = [
     "--strict-markers",
     "--strict-config", 
@@ -87,7 +87,7 @@ multi_line_output = 3
 line-length = 88
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "1.1.0"
 warn_return_any = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true  
