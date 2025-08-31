@@ -27,9 +27,37 @@ pip install reservoir-computing-benedictchen
 
 ```python
 import reservoir_computing_benedictchen
+import numpy as np
 
-# Example usage
-print("✅ Reservoir Computing loaded successfully!")
+# Create Echo State Network
+esn = reservoir_computing_benedictchen.EchoStateNetwork(
+    reservoir_size=100,
+    input_size=3,
+    output_size=1,
+    spectral_radius=0.95
+)
+
+# Generate sample temporal data
+time_steps = 1000
+X = np.random.randn(time_steps, 3)  # Input sequences
+y = np.sin(np.arange(time_steps) * 0.1)[:, np.newaxis]  # Target
+
+# Train the network
+esn.train(X, y)
+
+# Make predictions
+predictions = esn.predict(X[:100])
+print(f"✅ ESN prediction shape: {predictions.shape}")
+
+# Create Liquid State Machine  
+lsm = reservoir_computing_benedictchen.create_lsm_with_presets(
+    'temporal_pattern_recognition'
+)
+
+# Process spike trains
+spike_train = np.random.poisson(0.1, (100, 50))  # 100 time steps, 50 inputs
+liquid_states = lsm.process(spike_train)
+print(f"✅ LSM liquid states: {liquid_states.shape}")
 ```
 
 ## 🎓 About the Implementation
