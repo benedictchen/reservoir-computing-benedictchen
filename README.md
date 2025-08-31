@@ -5,7 +5,7 @@
 **[💳 DONATE VIA PAYPAL - CLICK HERE](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS)**
 
 [![CI](https://github.com/benedictchen/reservoir-computing-benedictchen/workflows/CI/badge.svg)](https://github.com/benedictchen/reservoir-computing-benedictchen/actions)
-[![PyPI version](https://badge.fury.io/py/reservoir-computing-benedictchen.svg)](https://badge.fury.io/py/reservoir-computing-benedictchen)
+[![PyPI version](https://badge.fury.io/py/reservoir_computing_benedictchen.svg)](https://badge.fury.io/py/reservoir_computing_benedictchen)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Custom%20Non--Commercial-red.svg)](LICENSE)
 
@@ -20,7 +20,7 @@
 ## 📦 Installation
 
 ```bash
-pip install reservoir-computing-benedictchen
+pip install reservoir_computing_benedictchen
 ```
 
 ## 🚀 Quick Start
