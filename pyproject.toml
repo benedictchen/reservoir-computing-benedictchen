@@ -96,3 +96,6 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = ["sklearn.*", "scipy.*", "matplotlib.*", "networkx.*"]
 ignore_missing_imports = true
+[tool.hatch.build.targets.wheel]
+py-modules = ["reservoir_computing_benedictchen"]
+only-include = ["*.py", "LICENSE", "README.md"]
