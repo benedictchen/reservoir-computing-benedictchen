@@ -1691,3 +1691,19 @@ class ConfigurationOptimizationMixin:
         if hasattr(self, '_validate_echo_state_property'):
             return self._validate_echo_state_property(n_tests, test_length, tolerance)
         return True  # Assume valid if validation method not available
+
+# Standalone wrapper functions for backward compatibility
+def optimize_spectral_radius(X_train, y_train, esn=None, **kwargs):
+    """Standalone wrapper for optimize_spectral_radius method."""
+    if esn is None:
+        from ..echo_state_network import EchoStateNetwork
+        esn = EchoStateNetwork(random_seed=42)
+    return esn.optimize_spectral_radius(X_train, y_train, **kwargs)
+
+def validate_esp(*args, **kwargs):
+    """Placeholder for ESP validation."""
+    return True
+
+def run_benchmark_suite(*args, **kwargs):
+    """Placeholder for benchmark suite."""
+    return {}

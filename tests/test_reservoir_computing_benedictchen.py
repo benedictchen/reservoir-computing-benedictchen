@@ -10,7 +10,7 @@ Author: Benedict Chen (benedict@benedictchen.com)
 
 import pytest
 import numpy as np
-import reservoir_computing_benedictchen
+import reservoir_computing
 
 
 class TestBasicFunctionality:
@@ -18,21 +18,21 @@ class TestBasicFunctionality:
     
     def test_module_import(self):
         """Test that the module imports successfully"""
-        assert reservoir_computing_benedictchen.__version__
-        assert hasattr(reservoir_computing_benedictchen, '__all__')
+        assert reservoir_computing.__version__
+        assert hasattr(reservoir_computing, '__all__')
         
     def test_module_components(self):
         """Test that main components are available"""
         # Check that main classes/functions are available
-        for component in reservoir_computing_benedictchen.__all__:
-            assert hasattr(reservoir_computing_benedictchen, component), f"Missing component: {component}"
+        for component in reservoir_computing.__all__:
+            assert hasattr(reservoir_computing, component), f"Missing component: {component}"
     
     def test_attribution_display(self):
         """Test that attribution is displayed on import"""
         # Import should trigger attribution display
         # This test just ensures no exceptions during import
         import importlib
-        importlib.reload(reservoir_computing_benedictchen)
+        importlib.reload(reservoir_computing)
         
     @pytest.mark.parametrize("numpy_version", ["latest"])
     def test_numpy_compatibility(self, numpy_version):
@@ -51,8 +51,8 @@ class TestModuleSpecific:
         # This is a basic smoke test - instantiate main classes
         try:
             # Get the first class from __all__ and try to instantiate it
-            main_classes = [getattr(reservoir_computing_benedictchen, name) for name in reservoir_computing_benedictchen.__all__ 
-                           if hasattr(getattr(reservoir_computing_benedictchen, name), '__init__')]
+            main_classes = [getattr(reservoir_computing, name) for name in reservoir_computing.__all__ 
+                           if hasattr(getattr(reservoir_computing, name), '__init__')]
             
             if main_classes:
                 # Try basic instantiation (this may fail for some classes, which is OK)
@@ -64,7 +64,7 @@ class TestModuleSpecific:
     
     def test_version_format(self):
         """Test that version follows semantic versioning"""
-        version = reservoir_computing_benedictchen.__version__
+        version = reservoir_computing.__version__
         version_parts = version.split('.')
         assert len(version_parts) >= 2, f"Version should have at least major.minor: {version}"
         
