@@ -30,11 +30,12 @@ test = [
 
 [project.urls]
 Funding = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS"
+Sponsor = "https://github.com/sponsors/benedictchen"
 
 [tool.hatch.build.targets.wheel]
-py-modules = ["echo_state_network", "liquid_state_machine", "esn_configuration", "esn_training", "hierarchical_reservoir", "lif_neuron", "liquid_state_extractors", "lsm_config", "neuromorphic_interface", "readout_mechanisms", "reservoir_optimizer", "reservoir_topology", "state_dynamics", "synaptic_models", "echo_state_validation"]
-only-include = ["*.py", "LICENSE", "README.md"]
+packages = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["--cov=reservoir_computing", "--cov-report=term-missing"]
+pythonpath = ["src"]
+addopts = ["--cov=src/reservoir_computing", "--cov-report=term-missing"]

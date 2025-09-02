@@ -387,3 +387,19 @@ If you use this implementation in academic work, please cite:
 **Every contribution creates positive feedback in my reservoir of gratitude! Your support maintains the echo state property of my motivation! 🚀**
 
 *P.S. - If you help me get that ocean reservoir island, I promise the waves will be named after different ESN topologies!*
+
+---
+
+<div align="center">
+
+## 🌟 What the Community is Saying
+
+</div>
+
+---
+
+> **@ChaosComputingKing** (823K followers) • *7 hours ago* • *(parody)*
+> 
+> *"BRO this reservoir computing library is absolutely UNHINGED and I mean that in the best way possible! 🌊 It's literally using chaotic neural soup to predict the future - like having a crystal ball but make it SCIENCE! Jaeger and Maass really said 'what if we made AI that works like a liquid brain' and honestly that's the most galaxy brain approach I've ever seen. This is giving 'I harness chaos for computational power' energy and it's sending me! Currently using ESNs to predict my TikTok engagement and the accuracy is lowkey scary good fr! 🧠⚡"*
+> 
+> **91.8K ❤️ • 16.3K 🔄 • 5.9K 🤯**
