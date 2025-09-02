@@ -22,6 +22,63 @@ class TrainingMethodsMixin:
              solver: str = 'ridge') -> Dict[str, Any]:
         """
         Train ESN using linear regression on reservoir states
+        
+        # FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
+        #
+        # 1. INCOMPLETE TRAINING PROCEDURE (Section 3.2, page 13)
+        #    - Paper's formal training algorithm has specific steps not implemented:
+        #    - Step 1: "Procure an echo-state network" - missing ESP validation before training
+        #    - Step 2: "Choose input connection weights" - no guidance on Win selection
+        #    - Step 3: "Run network with teacher input, dismiss initial transient"
+        #    - Step 4: "Compute output weights which minimize training error"
+        #    - Current implementation skips ESP validation and Win optimization
+        #    - Solutions:
+        #      a) Add mandatory ESP validation before training (Section 3.2, step 1)
+        #      b) Implement Win optimization strategies from paper
+        #      c) Add proper transient dismissal with adaptive washout
+        #    - Research basis: Section 3.2, page 13-14
+        #
+        # 2. INCORRECT LINEAR REGRESSION FORMULATION (Section 3.1, Equation 11-12)
+        #    - Paper's MSE formula: msetrain = 1/(nmax-nmin) Σ εtrain(n)²
+        #    - Where εtrain(n) = (f^out)^(-1)yteach(n) - Σ w^out_i xi(n)
+        #    - Current implementation doesn't handle f^out transformation properly
+        #    - Missing inverse output function transformation (f^out)^(-1)
+        #    - Solutions:
+        #      a) Apply (f^out)^(-1) to targets before regression: y' = (f^out)^(-1)(y)
+        #      b) Implement proper MSE computation matching Equation 11
+        #      c) Handle different output functions (linear, tanh, sigmoid)
+        #    - Research basis: Section 3.1, Equations 11-12, page 11-12
+        #    - Example:
+        #      ```python
+        #      if self.esn.output_function == 'tanh':
+        #          # Apply inverse tanh to targets
+        #          y_transformed = np.arctanh(np.clip(y_train, -0.99, 0.99))
+        #      elif self.esn.output_function == 'linear':
+        #          y_transformed = y_train
+        #      ```
+        #
+        # 3. MISSING WASHOUT PERIOD OPTIMIZATION (Section 4, multiple examples)
+        #    - Paper emphasizes importance of proper transient dismissal
+        #    - Examples use 100-500 step washout periods task-specifically
+        #    - No adaptive washout based on network dynamics or ESP properties
+        #    - Missing validation that washout period is sufficient
+        #    - Solutions:
+        #      a) Implement adaptive washout: monitor state settling dynamics
+        #      b) Use ESP time constant to determine minimum washout
+        #      c) Validate washout sufficiency through state stability analysis
+        #    - Research basis: Section 4.1.3, page 18; Section 6.3.1, page 29
+        #
+        # 4. INADEQUATE REGULARIZATION STRATEGY (not explicitly in paper)
+        #    - Paper uses simple linear regression without regularization discussion
+        #    - Missing analysis of overfit risk with large reservoir states
+        #    - No guidance on regularization parameter selection
+        #    - Missing cross-validation for hyperparameter tuning
+        #    - Solutions:
+        #      a) Implement regularization parameter selection via cross-validation
+        #      b) Add analysis of training vs validation error curves
+        #      c) Implement early stopping based on generalization error
+        #    - Research basis: Implicit from paper's emphasis on linear regression simplicity
+        
         Implements Algorithm 2 from Jaeger 2001
         """
         # Collect reservoir states

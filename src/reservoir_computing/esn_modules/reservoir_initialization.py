@@ -31,6 +31,50 @@ class ReservoirInitializationMixin:
         """
         Initialize reservoir weight matrix.
         
+        # FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
+        #
+        # 1. INSUFFICIENT SPECTRAL RADIUS VALIDATION (Proposition 3a vs 3b)
+        #    - Paper states: "σmax = Λ < 1" is SUFFICIENT condition for ESP (Proposition 3a, page 8)
+        #    - Paper states: "|λmax| > 1" causes NO echo states (Proposition 3b, page 8)  
+        #    - Current implementation only checks final spectral radius, ignoring scaling process
+        #    - Missing validation of Lipschitz condition: d(T(x,u), T(x',u)) < Λ d(x,x')
+        #    - Solutions:
+        #      a) Implement both σmax (largest singular value) AND |λmax| (spectral radius) checks
+        #      b) Add intermediate validation during scaling process
+        #      c) Warn when σmax << |λmax| (indicates potential numerical issues)
+        #    - Research basis: Section 2, Proposition 3, page 8
+        #    - Example validation:
+        #      ```python
+        #      eigenvals = np.linalg.eigvals(W)
+        #      singular_vals = np.linalg.svd(W, compute_uv=False)
+        #      spectral_radius = np.max(np.abs(eigenvals))
+        #      max_singular = np.max(singular_vals)
+        #      if max_singular < 1.0:
+        #          print(f"ESP GUARANTEED by Prop 3a: σmax={max_singular:.4f}")
+        #      elif spectral_radius >= 1.0:
+        #          warnings.warn(f"ESP VIOLATED by Prop 3b: |λmax|={spectral_radius:.4f}")
+        #      ```
+        #
+        # 2. MISSING ECHO STATE PROPERTY VALIDATION (Definition 1)
+        #    - Paper's core requirement: x(n) = E(...,u(n-1),u(n)) uniquely determined
+        #    - No validation that state is uniquely determined by input history
+        #    - Missing convergence testing from different initial conditions  
+        #    - Solutions:
+        #      a) Implement state convergence test with multiple initial conditions
+        #      b) Test "state forgetting" property (Definition 3, item 2)
+        #      c) Validate "input forgetting" property (Definition 3, item 3)
+        #    - Research basis: Section 2, Definition 1, page 6
+        #
+        # 3. INADEQUATE WEIGHT DISTRIBUTION ANALYSIS (Section 4.1.2)
+        #    - Paper uses careful weight distributions for different tasks
+        #    - Missing analysis of weight distribution impact on memory capacity
+        #    - No consideration of task-specific optimal distributions
+        #    - Solutions:
+        #      a) Add distribution analysis: mean, std, sparsity, connectivity patterns
+        #      b) Implement task-specific initialization strategies
+        #      c) Add memory capacity estimation based on weight statistics
+        #    - Research basis: Section 4.1.2, page 17
+        
         Args:
             n_reservoir: Number of reservoir units
             spectral_radius: Desired spectral radius

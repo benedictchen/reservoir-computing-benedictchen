@@ -15,7 +15,64 @@ class EspValidationMixin:
         self.esn = esn_instance
     
     def validate_comprehensive_esp(self) -> Dict[str, Any]:
-        """Comprehensive ESP validation using multiple methods"""
+        """
+        Comprehensive ESP validation using multiple methods
+        
+        # FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
+        #
+        # 1. INCOMPLETE ECHO STATE VALIDATION (Definition 1, page 6)
+        #    - Paper's formal definition: ESP exists if x(n) uniquely determined by u^(-∞)
+        #    - Missing test for "unique determination by left-infinite input sequence"
+        #    - Current convergence test is heuristic, not theoretically grounded
+        #    - Solutions:
+        #      a) Implement formal Definition 1 test: run two different infinite input histories
+        #         with same finite suffix and verify states converge
+        #      b) Test state contracting property: d(T(x,ū_h), T(x',ū_h)) < δ_h (Def 3.1)
+        #      c) Test state forgetting property: past states become irrelevant (Def 3.2)
+        #    - Research basis: Definition 1, page 6; Definition 3, page 7
+        #    - Example implementation:
+        #      ```python
+        #      # Test unique determination (Definition 1)
+        #      u_suffix = random_input_sequence(100)  # finite suffix
+        #      w_prefix = random_input_sequence(500)  # prefix 1
+        #      v_prefix = random_input_sequence(500)  # prefix 2
+        #      x_state1 = run_sequence(w_prefix + u_suffix)
+        #      x_state2 = run_sequence(v_prefix + u_suffix)
+        #      assert np.allclose(x_state1, x_state2, atol=1e-10)  # Must converge
+        #      ```
+        #
+        # 2. INCORRECT PROPOSITION 3 IMPLEMENTATION (page 8)
+        #    - Paper distinguishes between sufficient (3a) and necessary (3b) conditions
+        #    - Proposition 3a: "σmax < 1" is SUFFICIENT for ESP (guarantees ESP)
+        #    - Proposition 3b: "|λmax| > 1" means NO ESP (violates ESP)
+        #    - Current implementation conflates spectral radius with singular values
+        #    - Solutions:
+        #      a) Separate tests for σmax < 1 (sufficient condition)
+        #      b) Separate test for |λmax| ≥ 1 (necessary condition violation)
+        #      c) Handle intermediate case: σmax ≥ 1 and |λmax| < 1 (undetermined)
+        #    - Research basis: Proposition 3, page 8
+        #
+        # 3. MISSING STATE CONTRACTING/FORGETTING TESTS (Definition 3, page 7)
+        #    - Paper provides three EQUIVALENT characterizations of ESP
+        #    - Missing "state contracting": d(T(x,ū_h), T(x',ū_h)) → 0 as h → ∞
+        #    - Missing "state forgetting": initial state influence decays to zero
+        #    - Missing "input forgetting": distant past inputs become irrelevant
+        #    - Solutions:
+        #      a) Implement null sequence test for state contracting property
+        #      b) Implement exponential decay test for state influence
+        #      c) Implement input history truncation test
+        #    - Research basis: Definition 3, page 7; Proposition 1, page 7
+        #
+        # 4. INADEQUATE LIPSCHITZ CONDITION TESTING (Proposition 3a)
+        #    - Paper's sufficient condition requires Lipschitz property with constant Λ < 1
+        #    - Current spectral radius test doesn't verify actual contraction mapping
+        #    - Missing empirical validation of contraction property
+        #    - Solutions:
+        #      a) Test actual Lipschitz condition: sample many (x,x',u) triplets
+        #      b) Estimate Lipschitz constant empirically across input space
+        #      c) Verify contraction mapping property holds in practice
+        #    - Research basis: Proposition 3a proof, Appendix
+        """
         results = {}
         
         # Method 1: Spectral radius check

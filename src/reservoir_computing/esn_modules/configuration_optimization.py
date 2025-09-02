@@ -10,6 +10,114 @@ Author: Benedict Chen (benedict@benedictchen.com)
 
 Based on: Herbert Jaeger (2001) "The 'Echo State' Approach to Analysing and Training Recurrent Neural Networks"
 
+# FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
+#
+# 1. MISSING SYSTEMATIC PARAMETER SELECTION METHODOLOGY (Section 6.3, page 42-46)
+#    - Paper provides specific systematic approach: "Suggested general approach to designing ESN"
+#    - Current implementation lacks Jaeger's 8-step configuration process
+#    - Missing systematic spectral radius optimization starting from 0.8-0.9
+#    - No implementation of paper's incremental hyperparameter adjustment strategy
+#    - Solutions:
+#      a) Implement Jaeger's systematic 8-step process from Section 6.3
+#      b) Add incremental spectral radius adjustment: start at 0.8, increase until ESP violated
+#      c) Implement paper's "first get it working, then optimize" philosophy
+#      d) Add configuration validation at each step of systematic process
+#    - Research basis: Section 6.3 "Suggested general approach to designing ESN", page 42
+#    - Jaeger's steps:
+#      ```
+#      1. Generate training data with teacher forcing
+#      2. Choose reservoir size N (50-400)
+#      3. Create reservoir with spectral radius around 0.8
+#      4. Choose input scaling and shift
+#      5. Optimize spectral radius (0.8-1.5)
+#      6. Optimize noise (if needed)
+#      7. Optimize leak rate (if using leaky integrator)
+#      8. Consider output feedback (if needed)
+#      ```
+#
+# 2. INCORRECT SPECTRAL RADIUS OPTIMIZATION RANGE (Section 6.3.5, page 45)
+#    - Paper's recommended range: "typically around 0.8, sometimes up to 1.5"
+#    - Current default range (0.1, 1.5) includes values too low for practical use
+#    - Missing paper's guidance: "start with 0.8-0.9 and increase until performance degrades"
+#    - No implementation of ESP violation detection during optimization
+#    - Solutions:
+#      a) Change default range to (0.7, 1.4) based on paper recommendations
+#      b) Implement adaptive range: start at 0.8, expand based on ESP validation
+#      c) Add early stopping when ESP is violated (spectral radius ≥ 1.0 often fails)
+#      d) Include paper's warning about SR > 1.5 rarely being useful
+#    - Research basis: Section 6.3.5 "Choosing the spectral radius", page 45
+#
+# 3. MISSING INPUT SCALING AND SHIFT OPTIMIZATION (Section 6.3.3, page 43-44)
+#    - Paper emphasizes: "The input scaling and input shift are important parameters"
+#    - Missing systematic input scaling optimization: a · u(n) + b
+#    - No implementation of input preprocessing strategies from paper
+#    - Missing input signal analysis for optimal scaling
+#    - Solutions:
+#      a) Implement input scaling optimization: find optimal 'a' parameter
+#      b) Add input shift optimization: find optimal 'b' bias parameter
+#      c) Include input signal analysis: mean, variance, range normalization
+#      d) Add data-driven input scaling recommendations
+#    - Research basis: Section 6.3.3 "Choosing input scaling and input shift", page 43
+#    - Paper's guidance:
+#      ```python
+#      # Input preprocessing: a * input + b
+#      input_scaling = optimize_range(0.1, 2.0)  # 'a' parameter
+#      input_shift = optimize_range(-1.0, 1.0)   # 'b' parameter
+#      ```
+#
+# 4. INADEQUATE RESERVOIR SIZE SELECTION METHODOLOGY (Section 6.3.1, page 42)
+#    - Paper's guidance: "A good rule of thumb: N should be around the number of data points"
+#    - Current implementation lacks systematic reservoir size selection
+#    - Missing consideration of memory capacity vs. computational cost trade-offs
+#    - No implementation of paper's size vs. performance analysis
+#    - Solutions:
+#      a) Implement Jaeger's rule: N ≈ training_data_length for complex tasks
+#      b) Add memory capacity estimation based on reservoir size
+#      c) Include computational complexity analysis for size selection
+#      d) Implement paper's guidance: "start small (N=50), increase until diminishing returns"
+#    - Research basis: Section 6.3.1 "Choosing the reservoir size", page 42
+#
+# 5. MISSING WASHOUT PERIOD OPTIMIZATION (Section 6.3.2, page 43)
+#    - Paper emphasizes: "The initial washout period is crucial for performance"
+#    - Current implementation lacks systematic washout optimization
+#    - Missing paper's guidance: "washout should be at least 3-5 times the reservoir's intrinsic timescale"
+#    - No implementation of adaptive washout based on spectral radius
+#    - Solutions:
+#      a) Implement adaptive washout: washout_length = max(100, 5 * reservoir_timescale)
+#      b) Add reservoir timescale estimation: τ ≈ -1/log(spectral_radius)
+#      c) Include washout validation: monitor state convergence
+#      d) Add paper's rule: minimum washout = 100 for most applications
+#    - Research basis: Section 6.3.2 "Choosing the washout period", page 43
+#    - Paper's formula:
+#      ```python
+#      reservoir_timescale = -1 / np.log(spectral_radius)
+#      optimal_washout = max(100, int(5 * reservoir_timescale))
+#      ```
+#
+# 6. INCORRECT NOISE LEVEL RECOMMENDATIONS (Section 6.3.4, page 43)
+#    - Paper's recommendation: "noise level around 10^-12 to 10^-3"
+#    - Current default ranges (0.001-0.05) are too high according to paper
+#    - Missing paper's guidance: "less noise is typically better than more"
+#    - No implementation of task-specific noise level selection
+#    - Solutions:
+#      a) Update default noise ranges to match paper: (1e-12, 1e-3)
+#      b) Add paper's principle: "start with minimal noise, increase only if needed"
+#      c) Implement noise level validation against ESP stability
+#      d) Add task-specific noise recommendations from paper
+#    - Research basis: Section 6.3.4 "Choosing the amount of noise", page 43
+#
+# 7. MISSING TEACHER FORCING CONFIGURATION (Section 2, page 6; Section 3.4, page 13)
+#    - Paper distinguishes between teacher forcing (training) and autonomous generation
+#    - Missing systematic teacher forcing vs. autonomous mode configuration
+#    - No implementation of paper's feedback weight (W^back) optimization
+#    - Missing closed-loop stability analysis for autonomous generation
+#    - Solutions:
+#      a) Implement teacher forcing configuration: training uses target outputs
+#      b) Add autonomous generation mode: feedback uses predicted outputs
+#      c) Include W^back matrix optimization for output feedback
+#      d) Add stability analysis for closed-loop autonomous operation
+#    - Research basis: Section 3.4 "Autonomous Generation", page 13; Figure 1, page 6
+
 🎯 ELI5 Summary:
 Think of this module like a master tuner for a complex piano. Just as a piano tuner
 adjusts each string to achieve perfect harmony, this module fine-tunes every aspect

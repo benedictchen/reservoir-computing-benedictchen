@@ -1,6 +1,84 @@
 """
-Readout Mechanisms for Liquid State Machine
-Based on: Maass, Natschläger & Markram (2002) "Real-Time Computing Without Stable States"
+Prediction Generation for Echo State Networks
+Based on: Jaeger (2001) "The 'Echo State' Approach to Analysing and Training Recurrent Neural Networks"
+
+# FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
+#
+# 1. INCORRECT FOCUS ON LSM INSTEAD OF ESN (Throughout file)
+#    - File claims to implement "Liquid State Machine" readout from Maass 2002
+#    - Should implement ESN prediction/generation from Jaeger 2001
+#    - LSM and ESN have different mathematical foundations and approaches
+#    - ESN uses linear regression on reservoir states, not population neurons
+#    - Solutions:
+#      a) Rename file to focus on ESN prediction generation
+#      b) Implement Jaeger's linear readout: y(n) = f^out(W^out * [u(n); x(n)])
+#      c) Add autonomous generation: y(n+1) = f^out(W^out * [0; x(n+1)]) where x includes feedback
+#      d) Create separate LSM module if needed
+#    - Research basis: Section 3 "Training and Using Echo State Networks", page 9
+#
+# 2. MISSING AUTONOMOUS GENERATION (Section 3.4, page 13)
+#    - Paper's key capability: "the trained network can autonomously generate the teacher signal"
+#    - Current implementation lacks closed-loop generation mode
+#    - Missing W^back feedback matrix for autonomous operation
+#    - No teacher forcing vs. autonomous mode switching
+#    - Solutions:
+#      a) Implement generate() method for autonomous sequence generation
+#      b) Add output feedback: x(n+1) includes W^back * y(n) term
+#      c) Support priming with initial sequence, then autonomous generation
+#      d) Add mode switching between open-loop (prediction) and closed-loop (generation)
+#    - Research basis: Section 3.4 "Autonomous Generation", page 13; Figure 5
+#    - Example:
+#      ```python
+#      def generate_autonomous(self, n_steps, prime_sequence=None):
+#          # Prime with initial sequence if provided
+#          if prime_sequence is not None:
+#              states = self.run_reservoir(prime_sequence)
+#              last_state = states[-1]
+#              last_output = self.predict_from_state(last_state)
+#          
+#          # Generate autonomously
+#          for t in range(n_steps):
+#              # Update state with feedback: x(n+1) = f(W_in*0 + W*x(n) + W_back*y(n))
+#              last_state = self.update_state_with_feedback(last_state, last_output)
+#              last_output = self.predict_from_state(last_state)
+#              yield last_output
+#      ```
+#
+# 3. INCORRECT LINEAR REGRESSION IMPLEMENTATION (Section 3.1, Equations 11-12)
+#    - Paper's specific formulation: minimize ||W^out * M - T||² with Tikhonov regularization
+#    - Where M = [u; x] concatenates input and reservoir states
+#    - Missing proper state-input concatenation for readout
+#    - No implementation of Jaeger's specific pseudo-inverse formula
+#    - Solutions:
+#      a) Concatenate inputs and states: M = [u(n); x(n)] for all n
+#      b) Implement Jaeger's exact formula: W^out = (M*M^T + αI)^(-1) * M * T^T
+#      c) Add ridge regression with proper regularization parameter α
+#      d) Support different output activation functions f^out
+#    - Research basis: Section 3.1 "Linear Regression Training", page 9; Equations 11-12
+#
+# 4. MISSING OUTPUT ACTIVATION FUNCTIONS (Section 3.1)
+#    - Paper mentions output activation: y(n) = f^out(W^out * [u(n); x(n)])
+#    - Current implementation assumes linear output (f^out = identity)
+#    - Missing support for tanh, sigmoid, or other output activations
+#    - No handling of output scaling or normalization
+#    - Solutions:
+#      a) Add output_activation parameter: 'linear', 'tanh', 'sigmoid'
+#      b) Implement inverse output functions for target transformation
+#      c) Add output scaling and bias terms
+#      d) Support task-specific output transformations
+#    - Research basis: Section 3.1, various examples with different output types
+#
+# 5. INADEQUATE WASHOUT HANDLING IN PREDICTION (Section 3.2)
+#    - Paper emphasizes washout period importance for transient removal
+#    - Current prediction methods don't properly handle washout
+#    - No adaptive washout based on reservoir dynamics
+#    - Missing washout optimization procedures
+#    - Solutions:
+#      a) Always discard initial washout states in prediction
+#      b) Implement adaptive washout: monitor state convergence
+#      c) Add washout validation: ensure sufficient transient removal
+#      d) Support different washout strategies per task
+#    - Research basis: Section 3.2 "Training Procedure", page 11
 """
 
 import numpy as np
