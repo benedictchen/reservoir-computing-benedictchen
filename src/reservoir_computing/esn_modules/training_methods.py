@@ -26,35 +26,78 @@ class TrainingMethodsMixin:
         # FIXME: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
         #
         # 1. INCOMPLETE TRAINING PROCEDURE (Section 3.2, page 13)
-        #    - Paper's formal training algorithm has specific steps not implemented:
-        #    - Step 1: "Procure an echo-state network" - missing ESP validation before training
-        #    - Step 2: "Choose input connection weights" - no guidance on Win selection
-        #    - Step 3: "Run network with teacher input, dismiss initial transient"
-        #    - Step 4: "Compute output weights which minimize training error"
-        #    - Current implementation skips ESP validation and Win optimization
-        #    - Solutions:
-        #      a) Add mandatory ESP validation before training (Section 3.2, step 1)
-        #      b) Implement Win optimization strategies from paper
-        #      c) Add proper transient dismissal with adaptive washout
-        #    - Research basis: Section 3.2, page 13-14
+        #    - Paper's formal training algorithm has specific steps not implemented
+        #    - CODE REVIEW SUGGESTION - Implement complete Jaeger training procedure:
+        #      ```python
+        #      def train_jaeger_complete(self, X_train, y_train, validate_esp=True):
+        #          """Complete training procedure from Jaeger (2001) Section 3.2"""
+        #          # Step 1: Validate Echo State Property
+        #          if validate_esp and not self._validate_echo_state_property():
+        #              raise ValueError("Network does not satisfy Echo State Property")
+        #          
+        #          # Step 2: Optimize input weights (if requested)
+        #          if getattr(self, 'optimize_input_weights', False):
+        #              self._optimize_input_weights(X_train)
+        #          
+        #          # Step 3: Run with teacher input, dismiss transients
+        #          washout = self._determine_optimal_washout(X_train)
+        #          states = self._collect_training_states(X_train, washout)
+        #          y_target = y_train[washout:]
+        #          
+        #          # Step 4: Linear regression on concatenated [u(n); x(n)]
+        #          augmented_states = np.hstack([X_train[washout:], states])
+        #          self.output_weights = self._solve_linear_system(augmented_states, y_target)
+        #      
+        #      def _validate_echo_state_property(self) -> bool:
+        #          """Validate ESP using fading memory criterion"""
+        #          # Test with two different input sequences
+        #          test_length = 100
+        #          u1 = np.random.randn(test_length, self.esn.n_inputs)
+        #          u2 = u1.copy()
+        #          u2[50:] = np.random.randn(50, self.esn.n_inputs)  # Different after t=50
+        #          
+        #          states1 = self.esn.run_reservoir(u1)
+        #          states2 = self.esn.run_reservoir(u2)
+        #          
+        #          # ESP satisfied if states converge after perturbation
+        #          state_diff = np.linalg.norm(states1[-10:] - states2[-10:], axis=1)
+        #          return np.mean(state_diff) < 0.1  # Convergence threshold
+        #      ```
         #
         # 2. INCORRECT LINEAR REGRESSION FORMULATION (Section 3.1, Equation 11-12)
         #    - Paper's MSE formula: msetrain = 1/(nmax-nmin) Σ εtrain(n)²
         #    - Where εtrain(n) = (f^out)^(-1)yteach(n) - Σ w^out_i xi(n)
-        #    - Current implementation doesn't handle f^out transformation properly
-        #    - Missing inverse output function transformation (f^out)^(-1)
-        #    - Solutions:
-        #      a) Apply (f^out)^(-1) to targets before regression: y' = (f^out)^(-1)(y)
-        #      b) Implement proper MSE computation matching Equation 11
-        #      c) Handle different output functions (linear, tanh, sigmoid)
-        #    - Research basis: Section 3.1, Equations 11-12, page 11-12
-        #    - Example:
+        #    - CODE REVIEW SUGGESTION - Apply inverse output transformation:
         #      ```python
-        #      if self.esn.output_function == 'tanh':
-        #          # Apply inverse tanh to targets
-        #          y_transformed = np.arctanh(np.clip(y_train, -0.99, 0.99))
-        #      elif self.esn.output_function == 'linear':
-        #          y_transformed = y_train
+        #      def _apply_inverse_output_function(self, targets: np.ndarray) -> np.ndarray:
+        #          """Apply (f^out)^(-1) transformation per Equation 11"""
+        #          output_func = getattr(self.esn, 'output_function', 'linear')
+        #          
+        #          if output_func == 'tanh':
+        #              # Inverse hyperbolic tangent: atanh(y)
+        #              targets_clipped = np.clip(targets, -0.999, 0.999)  # Avoid singularity
+        #              return np.arctanh(targets_clipped)
+        #          elif output_func == 'sigmoid' or output_func == 'logistic':
+        #              # Inverse sigmoid: log(y/(1-y))
+        #              targets_clipped = np.clip(targets, 0.001, 0.999)  # Avoid singularity
+        #              return np.log(targets_clipped / (1 - targets_clipped))
+        #          elif output_func == 'linear':
+        #              return targets  # No transformation needed
+        #          else:
+        #              warnings.warn(f"Unknown output function {output_func}, using linear")
+        #              return targets
+        #      
+        #      def _compute_jaeger_mse(self, predictions: np.ndarray, targets: np.ndarray) -> float:
+        #          """Compute MSE using Jaeger's formula from Equation 11"""
+        #          # Apply inverse output transformation to targets
+        #          targets_transformed = self._apply_inverse_output_function(targets)
+        #          
+        #          # Compute error: ε(n) = (f^out)^(-1)y_teach(n) - Σ w^out_i x_i(n)
+        #          error = targets_transformed - predictions
+        #          
+        #          # MSE: 1/(nmax-nmin) Σ ε(n)²
+        #          mse = np.mean(error ** 2)
+        #          return mse
         #      ```
         #
         # 3. MISSING WASHOUT PERIOD OPTIMIZATION (Section 4, multiple examples)

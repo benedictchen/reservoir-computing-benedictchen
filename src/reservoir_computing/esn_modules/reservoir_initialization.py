@@ -36,23 +36,64 @@ class ReservoirInitializationMixin:
         # 1. INSUFFICIENT SPECTRAL RADIUS VALIDATION (Proposition 3a vs 3b)
         #    - Paper states: "σmax = Λ < 1" is SUFFICIENT condition for ESP (Proposition 3a, page 8)
         #    - Paper states: "|λmax| > 1" causes NO echo states (Proposition 3b, page 8)  
-        #    - Current implementation only checks final spectral radius, ignoring scaling process
-        #    - Missing validation of Lipschitz condition: d(T(x,u), T(x',u)) < Λ d(x,x')
-        #    - Solutions:
-        #      a) Implement both σmax (largest singular value) AND |λmax| (spectral radius) checks
-        #      b) Add intermediate validation during scaling process
-        #      c) Warn when σmax << |λmax| (indicates potential numerical issues)
-        #    - Research basis: Section 2, Proposition 3, page 8
-        #    - Example validation:
+        #    - CODE REVIEW SUGGESTION - Implement complete ESP validation:
         #      ```python
-        #      eigenvals = np.linalg.eigvals(W)
-        #      singular_vals = np.linalg.svd(W, compute_uv=False)
-        #      spectral_radius = np.max(np.abs(eigenvals))
-        #      max_singular = np.max(singular_vals)
-        #      if max_singular < 1.0:
-        #          print(f"ESP GUARANTEED by Prop 3a: σmax={max_singular:.4f}")
-        #      elif spectral_radius >= 1.0:
-        #          warnings.warn(f"ESP VIOLATED by Prop 3b: |λmax|={spectral_radius:.4f}")
+        #      def validate_echo_state_property(self, W: np.ndarray, 
+        #                                      activation_func: callable = np.tanh) -> Dict[str, Any]:
+        #          """Validate ESP using both Proposition 3a and 3b from Jaeger (2001)"""
+        #          # Compute both eigenvalues and singular values
+        #          eigenvals = np.linalg.eigvals(W)
+        #          singular_vals = np.linalg.svd(W, compute_uv=False)
+        #          
+        #          spectral_radius = np.max(np.abs(eigenvals))  # |λmax|
+        #          max_singular = np.max(singular_vals)         # σmax
+        #          
+        #          results = {
+        #              'spectral_radius': spectral_radius,
+        #              'max_singular_value': max_singular,
+        #              'esp_guaranteed': False,
+        #              'esp_violated': False,
+        #              'warnings': []
+        #          }
+        #          
+        #          # Proposition 3a: σmax < 1 guarantees ESP
+        #          if max_singular < 1.0:
+        #              results['esp_guaranteed'] = True
+        #              print(f"✓ ESP GUARANTEED by Proposition 3a: σmax = {max_singular:.4f}")
+        #          
+        #          # Proposition 3b: |λmax| ≥ 1 violates ESP  
+        #          elif spectral_radius >= 1.0:
+        #              results['esp_violated'] = True
+        #              results['warnings'].append(f"ESP VIOLATED by Proposition 3b: |λmax| = {spectral_radius:.4f}")
+        #          
+        #          # Edge case: σmax ≥ 1 but |λmax| < 1 (numerical caution needed)
+        #          elif max_singular >= 1.0 and spectral_radius < 1.0:
+        #              results['warnings'].append(f"ESP uncertain: σmax = {max_singular:.4f}, |λmax| = {spectral_radius:.4f}")
+        #          
+        #          return results
+        #      
+        #      def test_state_convergence(self, W: np.ndarray, n_inputs: int = 1,
+        #                               test_length: int = 200) -> bool:
+        #          """Test if states converge from different initial conditions"""
+        #          # Generate test input sequence
+        #          u_test = np.random.randn(test_length, n_inputs)
+        #          
+        #          # Test from two different initial states
+        #          x1 = np.random.randn(W.shape[0])
+        #          x2 = np.random.randn(W.shape[0])
+        #          
+        #          # Run both trajectories
+        #          states1, states2 = [x1], [x2]
+        #          for t in range(test_length - 1):
+        #              x1_next = np.tanh(W @ x1 + u_test[t])  # Simplified dynamics
+        #              x2_next = np.tanh(W @ x2 + u_test[t])
+        #              states1.append(x1_next)
+        #              states2.append(x2_next)
+        #              x1, x2 = x1_next, x2_next
+        #          
+        #          # Check convergence in final portion
+        #          final_diff = np.linalg.norm(np.array(states1[-50:]) - np.array(states2[-50:]))
+        #          return final_diff < 0.1  # Convergence threshold
         #      ```
         #
         # 2. MISSING ECHO STATE PROPERTY VALIDATION (Definition 1)

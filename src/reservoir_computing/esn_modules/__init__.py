@@ -39,7 +39,6 @@ CORE_AVAILABLE = True
 from .configuration_optimization import (
     ConfigurationOptimizationMixin,
     optimize_spectral_radius,
-    validate_esp,
     run_benchmark_suite
 )
 
