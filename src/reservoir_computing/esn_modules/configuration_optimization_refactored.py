@@ -29,7 +29,6 @@ from typing import Dict, List, Tuple, Union, Optional, Any, Set, Callable
 from dataclasses import dataclass, field
 import warnings
 
-# Import the modular implementation
 from .configuration_basic import ConfigurationBasicMixin
 from .configuration_advanced import ConfigurationAdvancedMixin
 from .hyperparameter_optimization import HyperparameterOptimizationMixin

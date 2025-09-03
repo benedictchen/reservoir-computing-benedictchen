@@ -2,9 +2,6 @@
 🔧 Echo State Network - Configuration Helpers Module
 ===================================================
 
-Split from configuration_optimization.py (1817 lines → modular architecture)
-Part of reservoir_computing package 800-line compliance initiative.
-
 Author: Benedict Chen (benedict@benedictchen.com)
 Based on: Jaeger, H. (2001) "The Echo State Approach to Analysing and Training Recurrent Neural Networks"
 
@@ -18,30 +15,81 @@ Provides essential support functions used by the main configuration modules:
 • Echo State Property (ESP) validation methods
 • Backward compatibility wrapper functions
 
-🔧 HELPER CATEGORIES:
+💰 Donations: Help support this research!
+   PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS
+   💖 Please consider recurring donations to support continued ESN research
+
+🔬 Research Foundation:
+======================
+Configuration helpers implementing Jaeger (2001) requirements:
+- Echo State Property validation: spectral radius ρ(W) < 1
+- Activation function theory: tanh, leaky integrator variants
+- Bias initialization: uniform, gaussian, adaptive strategies
+- Parameter validation: ensuring stable reservoir dynamics
+
+🔧 Helper Categories:
 ===================
 1. **Initialization Helpers**: Setup methods for various components
 2. **Validation Helpers**: ESP and configuration validation
 3. **Utility Functions**: Common operations and calculations
 4. **Compatibility Wrappers**: Standalone functions for backward compatibility
 
-📊 TECHNICAL FOUNDATION:
-========================
-Implements core helper functionality that supports all configuration operations:
-- Activation function mapping and initialization
-- Bias term generation with adaptive strategies
-- Fast ESP validation for optimization routines
-- Utility functions for parameter management
+ELI5 Explanation:
+================
+Think of configuration helpers like a toolbox for building Echo State Networks! 🧰
 
-⚡ PERFORMANCE CHARACTERISTICS:
+When you build a house, you need many small tools:
+- **Level** (ESP validation) - makes sure your foundation isn't crooked
+- **Measuring tape** (parameter validation) - ensures everything fits right  
+- **Screws and bolts** (activation functions) - the basic connectors
+- **Paint** (bias terms) - adds the finishing touches
+
+Similarly, when building an ESN, you need lots of small helper functions:
+- Check that your reservoir won't explode (ESP validation)
+- Set up the activation functions properly (tanh, sigmoid, etc.)
+- Initialize bias terms so the network learns effectively
+- Validate that all your parameters make mathematical sense
+
+ASCII Helper Architecture:
+==========================
+    Configuration Request    Helper Function     Validated Component
+    ┌───────────────────┐    ┌─────────────┐    ┌─────────────────┐
+    │"Initialize        │───▶│validate_esp()│───▶│✓ Stable        │
+    │ reservoir with    │    │check ρ < 1  │    │  Reservoir      │
+    │ spectral_radius=  │    │             │    │  ρ = 0.95       │
+    │ 0.95"            │    └─────────────┘    └─────────────────┘
+    └───────────────────┘           │                    │
+                                    ▼                    ▼
+    ┌───────────────────┐    ┌─────────────┐    ┌─────────────────┐
+    │"Set activation    │───▶│setup_       │───▶│✓ Tanh Function │
+    │ function to       │    │activation() │    │  f(x) = tanh(x) │
+    │ tanh"            │    │             │    │  Bounded [-1,1] │
+    └───────────────────┘    └─────────────┘    └─────────────────┘
+                                    │                    │
+                                    ▼                    ▼
+    ┌───────────────────┐    ┌─────────────┐    ┌─────────────────┐
+    │"Initialize bias   │───▶│init_bias_   │───▶│✓ Random Bias   │
+    │ terms with        │    │terms()      │    │  ~N(0, 0.1²)    │
+    │ small variance"   │    │             │    │  Size: n_reservoir│
+    └───────────────────┘    └─────────────┘    └─────────────────┘
+
+📊 Technical Implementation:
+===========================
+1. **ESP Validation**: Computes largest eigenvalue λ_max, ensures λ_max < 1
+2. **Activation Setup**: Maps string names to mathematical functions
+3. **Bias Initialization**: Multiple strategies (uniform, gaussian, zeros, adaptive)
+4. **Parameter Validation**: Type checking, range validation, mathematical constraints
+
+⚡ Performance Characteristics:
 ==============================
 • Helper methods are lightweight and fast
 • Initialization methods: O(n_reservoir) complexity
-• Validation methods: O(n_tests * test_length) complexity
+• ESP validation: O(n_reservoir²) for eigenvalue computation
 • Utility functions: Generally O(1) or O(n) operations
 
 This module contains the essential "glue" code that makes all other
-configuration modules work together seamlessly.
+configuration modules work together seamlessly, ensuring mathematical
+correctness and computational stability.
 """
 
 from typing import Dict, List, Tuple, Union, Optional, Any, Callable

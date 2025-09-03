@@ -2,8 +2,6 @@
 🌌 Reservoir Computing - Comparative & Spectral Analysis Visualization Module
 ============================================================================
 
-Split from visualization.py (1438 lines → modular architecture)
-Part of reservoir_computing package 800-line compliance initiative.
 
 Author: Benedict Chen (benedict@benedictchen.com)
 Based on: Jaeger, H. (2001) "The Echo State Approach to Analysing and Training Recurrent Neural Networks"

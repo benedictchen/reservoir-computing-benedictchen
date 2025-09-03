@@ -1,13 +1,94 @@
 """
-🔄 Comparative Visualization - Multi-Configuration Analysis
-========================================================
+📊 Comparative Visualization - Multi-ESN Performance Analysis
+===========================================================
 
 Author: Benedict Chen (benedict@benedictchen.com)
 
-This module provides comparative analysis visualization for Echo State Networks,
-allowing comparison of multiple reservoir configurations and their performance.
+💰 Donations: Help support this research!
+   PayPal: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WXQKYYKPHWXHS
+   💖 Please consider recurring donations to support continued ESN research
 
-Based on: Comparative analysis methods for reservoir computing systems
+This module provides comprehensive comparative visualization for Echo State Networks,
+enabling systematic analysis of multiple reservoir configurations, hyperparameter
+effects, and performance trade-offs across different experimental conditions.
+
+🔬 Research Foundation:
+======================
+Visualization methods supporting ESN research analysis:
+- Jaeger (2001): Performance metrics and evaluation methodologies
+- Lukoševičius (2012): Practical guide to reservoir computing - analysis techniques
+- Verstraeten et al. (2007): Experimental design for reservoir computing
+- Modern ML: Statistical comparison methods and visualization best practices
+
+ELI5 Explanation:
+================
+Think of comparative visualization like a sports scoreboard for AI algorithms! 🏆
+
+🏃‍♂️ **Sports Tournament Analogy**:
+Imagine you're coaching multiple teams (different ESN configurations) and you
+want to see which performs best:
+- Each team has different strengths (spectral radius, reservoir size, etc.)
+- They compete in different events (time series tasks, classification, etc.)
+- You need clear charts to see who wins what and why
+
+📈 **What This Module Does**:
+- Creates "scoreboards" comparing multiple ESN configurations side-by-side
+- Shows which settings work best for different types of problems
+- Helps you understand trade-offs (accuracy vs speed, memory vs performance)
+- Makes it easy to pick the best configuration for your specific task
+
+ASCII Comparative Analysis Architecture:
+=======================================
+    Multiple ESN Configs    Analysis Engine    Visualization Output
+    ┌─────────────────┐    ┌─────────────────┐ ┌─────────────────────┐
+    │ Config A:       │    │ Performance     │ │ Bar Charts:         │
+    │ ρ=0.9, N=100   │───▶│ Metrics:        │▶│ ┌─┬─┬─┬─┬─┬─┬─┬─┐  │
+    │ Accuracy: 85%   │    │ - Accuracy      │ │ │A│B│C│D│A│B│C│D│  │
+    └─────────────────┘    │ - Speed         │ │ └─┴─┴─┴─┴─┴─┴─┴─┘  │
+    ┌─────────────────┐    │ - Memory        │ │                     │
+    │ Config B:       │───▶│ - Stability     │ │ Heatmaps:           │
+    │ ρ=0.95, N=200  │    │                 │▶│ ┌─────────────────┐ │
+    │ Accuracy: 92%   │    │ Statistical     │ │ │ ■■■□□ Config A  │ │
+    └─────────────────┘    │ Tests:          │ │ │ ■■■■■ Config B  │ │
+    ┌─────────────────┐    │ - T-tests       │ │ │ ■■■■□ Config C  │ │
+    │ Config C:       │───▶│ - ANOVA         │ │ └─────────────────┘ │
+    │ ρ=0.8, N=300   │    │ - Effect Size   │ │                     │
+    │ Accuracy: 88%   │    │                 │▶│ Scatter Plots:      │
+    └─────────────────┘    │ Ranking &       │ │      Acc vs Speed   │
+    ┌─────────────────┐    │ Selection:      │ │ 100┌─────────────┐ │
+    │ Config D:       │───▶│ - Pareto Front  │ │ 90 │    B●       │ │
+    │ ρ=0.85, N=150  │    │ - Best Config   │ │ 80 │ C●    A● D● │ │
+    │ Accuracy: 90%   │    │ - Trade-offs    │ │ 70 └─────────────┘ │
+    └─────────────────┘    └─────────────────┘ └─────────────────────┘
+
+⚡ Visualization Types:
+======================
+1. **Performance Bar Charts**: Direct metric comparison across configurations
+2. **Heatmaps**: Parameter space exploration and correlation analysis  
+3. **Scatter Plots**: Trade-off analysis (accuracy vs speed, memory vs performance)
+4. **Box Plots**: Statistical distribution comparison with confidence intervals
+5. **Radar Charts**: Multi-dimensional performance profiles
+6. **Time Series**: Training convergence and stability analysis
+
+📊 Analysis Features:
+====================
+• **Statistical Testing**: T-tests, ANOVA for significant differences
+• **Effect Size Analysis**: Cohen's d, eta-squared for practical significance
+• **Confidence Intervals**: Proper uncertainty quantification
+• **Pareto Optimization**: Multi-objective trade-off analysis
+• **Ranking Systems**: Automated best-configuration selection
+• **Export Options**: High-quality plots for publications
+
+🎯 Common Use Cases:
+===================
+- **Hyperparameter Tuning**: Which spectral radius works best?
+- **Architecture Comparison**: Small vs large reservoirs
+- **Task-Specific Analysis**: What works for your specific dataset?
+- **Resource Optimization**: Best accuracy within memory/time constraints
+- **Research Publication**: Professional-quality comparison figures
+
+This module transforms complex ESN experimental results into clear,
+actionable insights for both research and practical applications.
 """
 
 import numpy as np

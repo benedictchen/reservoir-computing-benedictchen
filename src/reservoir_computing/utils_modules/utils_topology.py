@@ -2,8 +2,6 @@
 🌐 Reservoir Computing - Topology Management Module
 ===================================================
 
-Split from utils.py (1142 lines → modular architecture)
-Part of reservoir_computing package 800-line compliance initiative.
 
 Author: Benedict Chen (benedict@benedictchen.com)
 Based on: Watts & Strogatz (1998) "Collective dynamics of 'small-world' networks"
