@@ -40,7 +40,7 @@ class ReservoirInitializationMixin:
         #      ```python
         #      def validate_echo_state_property(self, W: np.ndarray, 
         #                                      activation_func: callable = np.tanh) -> Dict[str, Any]:
-        #          """Validate ESP using both Proposition 3a and 3b from Jaeger (2001)"""
+        #          # Validate ESP using both Proposition 3a and 3b from Jaeger (2001)
         #          # Compute both eigenvalues and singular values
         #          eigenvals = np.linalg.eigvals(W)
         #          singular_vals = np.linalg.svd(W, compute_uv=False)
