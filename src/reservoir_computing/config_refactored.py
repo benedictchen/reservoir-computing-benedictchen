@@ -8,7 +8,6 @@ Refactored from monolithic config.py (859 lines → 4 focused modules).
 Author: Benedict Chen (benedict@benedictchen.com)
 Based on: Jaeger, H. (2001) "The Echo State Approach to Analysing and Training Recurrent Neural Networks"
 
-🎯 MODULAR ARCHITECTURE SUCCESS:
 ===============================
 Original: 859 lines (7% over 800-line limit) → 4 modules averaging 197 lines each
 Total reduction: 83% in largest file while preserving 100% functionality
@@ -189,7 +188,6 @@ print(comparison['summary'])
 if __name__ == "__main__":
     print("🏗️ Reservoir Computing - Configuration Suite")
     print("=" * 50)
-    print("📊 MODULARIZATION SUCCESS:")
     print(f"  Original: 859 lines (7% over 800-line limit)")
     print(f"  Refactored: 4 modules totaling 789 lines (83% reduction in largest file)")
     print(f"  Largest module: 289 lines (64% under 800-line limit) ✅")

@@ -16,7 +16,7 @@ Each module focuses on specific visualization domains for better organization an
 - animation_utilities.py - Animations and utility functions
 
 📊 **Benefits of Modularization:**
-- 75% reduction in largest file size (1569 → ~400 lines max)
+- Visualization functions for reservoir analysis
 - Logical separation by visualization domain
 - Improved maintainability and testing
 - Specialized imports for better performance

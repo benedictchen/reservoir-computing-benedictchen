@@ -60,7 +60,6 @@ from .core import (
     EchoStateNetwork,
     
     # ═══════════════════════════════════════════════════════════════════════════
-    # 🔬 ADVANCED ESN IMPLEMENTATIONS - ALL FIXME SOLUTIONS IMPLEMENTED
     # ═══════════════════════════════════════════════════════════════════════════
     # ALL REAL IMPLEMENTATIONS - NO MORE FAKE CODE
     DeepEchoStateNetwork,      # ✅ REAL: Multiple reservoir layers
@@ -231,7 +230,6 @@ __all__ = [
     "create_echo_state_network",
     
     # ═══════════════════════════════════════════════════════════════════════════
-    # 🔬 ADVANCED ESN IMPLEMENTATIONS - ALL FIXME SOLUTIONS IMPLEMENTED 
     # ═══════════════════════════════════════════════════════════════════════════
     "DeepEchoStateNetwork",       # ✅ REAL: Multiple reservoir layers
     "OnlineEchoStateNetwork",     # ✅ REAL: RLS online training

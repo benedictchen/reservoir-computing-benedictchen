@@ -24,7 +24,6 @@ from .core_modules.prediction_generation import PredictionMixin
 from .core_modules.echo_state_network import EchoStateNetwork
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 🔬 COMPLETE ADVANCED ESN IMPLEMENTATIONS - ALL FIXME SOLUTIONS IMPLEMENTED
 # ═══════════════════════════════════════════════════════════════════════════
 
 # Import real implementations - NO MORE FAKE CODE
@@ -86,6 +85,6 @@ __all__ = [
 # 5. prediction_generation.py (157 lines) - Forward and autonomous prediction
 # 6. echo_state_network.py (152 lines) - Main ESN class
 #
-# Total modular lines: ~986 lines (30% reduction through cleanup)
-# Largest module: 346 lines (75% reduction from original)
+# Core reservoir computing implementation
+# Based on Echo State Networks (Jaeger 2001)
 # Benefits: Better organization, easier testing, focused responsibilities

@@ -1,6 +1,5 @@
 """
 Echo State Property Validation for ESN - COMPLETE RESEARCH-ACCURATE IMPLEMENTATION
-Implements ESP validation methods from Jaeger 2001 and extensions with ALL FIXME SOLUTIONS
 """
 
 import numpy as np
@@ -123,7 +122,6 @@ class EspValidationMixin:
         return results
     
     # ══════════════════════════════════════════════════════════════════════════════════════════════
-    # FIXME SOLUTIONS IMPLEMENTED: All Jaeger (2001) Research-Accurate Methods
     # ══════════════════════════════════════════════════════════════════════════════════════════════
     
     def _validate_jaeger_definition_1(self, test_length: int = 1000, 

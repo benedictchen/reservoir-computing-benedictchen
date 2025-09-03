@@ -8,7 +8,6 @@ Refactored from monolithic utils.py (1142 lines → 3 focused modules).
 Author: Benedict Chen (benedict@benedictchen.com)  
 Based on: Jaeger, H. (2001) "The Echo State Approach to Analysing and Training Recurrent Neural Networks"
 
-🎯 MODULAR ARCHITECTURE SUCCESS:
 ===============================
 Original: 1142 lines (43% over 800-line limit) → 3 modules averaging 380 lines each
 Total reduction: 67% in largest file while preserving 100% functionality
@@ -159,7 +158,6 @@ optimization = utils_optimization.optimize_hyperparameters(ESN, param_grid, X, y
 if __name__ == "__main__":
     print("🏗️ Reservoir Computing - Utilities Suite")
     print("=" * 50)
-    print("📊 MODULARIZATION SUCCESS:")
     print(f"  Original: 1142 lines (43% over 800-line limit)")
     print(f"  Refactored: 3 modules totaling 1140 lines (67% reduction in largest file)")
     print(f"  Largest module: 420 lines (47% under 800-line limit) ✅")

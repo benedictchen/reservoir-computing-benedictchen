@@ -8,7 +8,6 @@ Now imports from specialized modules to meet 800-line standard.
 Author: Benedict Chen (benedict@benedictchen.com)
 Based on: Jaeger, H. (2001) "The Echo State Approach to Analysing and Training Recurrent Neural Networks"
 
-🎯 MODULAR ARCHITECTURE SUCCESS:
 ===============================
 Original: 1438 lines (79% over limit) → 5 modules averaging 320 lines each
 Total reduction: 30% in largest file while preserving 100% functionality
@@ -120,7 +119,6 @@ class MyESN(VisualizationMixin):
 if __name__ == "__main__":
     print("🎨 Reservoir Computing - Visualization Suite")
     print("=" * 55)
-    print("📊 MODULARIZATION SUCCESS:")
     print(f"  Original: 1438 lines (79% over 800-line limit)")
     print(f"  Refactored: 5 modules totaling 1600 lines (30% reduction in largest file)")
     print(f"  Largest module: 440 lines (45% under 800-line limit) ✅")

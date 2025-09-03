@@ -18,9 +18,7 @@ class EspValidationMixin:
         """
         Comprehensive ESP validation using multiple methods
         
-        # FIXME SOLUTIONS IMPLEMENTED: Critical Research Accuracy Issues Based on Actual Jaeger (2001) Paper
         #
-        # ALL SOLUTIONS IMPLEMENTED BELOW:
         # 1. JAEGER DEFINITION 1 TEST: validate_jaeger_definition_1() - formal ESP validation
         # 2. STATE CONTRACTING PROPERTY: validate_state_contracting_property() - Definition 3.1
         # 3. PROPOSITION 3A SUFFICIENT: validate_proposition_3a_sufficient() - σmax < 1 test
