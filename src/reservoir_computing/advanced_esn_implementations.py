@@ -2,7 +2,7 @@
 ====================================================
 
 Author: Benedict Chen (benedict@benedictchen.com) 
-Based on: Comprehensive fake code audit - implementing ALL identified solutions
+Based on: Advanced ESN research literature
 
 🚀 RESEARCH FOUNDATION:
 ======================
