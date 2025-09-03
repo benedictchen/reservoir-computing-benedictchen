@@ -49,6 +49,16 @@ from .performance_visualization import (
     print_performance_statistics
 )
 
+from .spectral_visualization import (
+    visualize_spectral_analysis,
+    print_spectral_statistics
+)
+
+from .comparative_visualization import (
+    visualize_comparative_analysis,
+    print_comparative_summary
+)
+
 __all__ = [
     # Structure visualization
     'visualize_reservoir_structure',
@@ -60,5 +70,13 @@ __all__ = [
     
     # Performance visualization
     'visualize_performance_analysis',
-    'print_performance_statistics'
+    'print_performance_statistics',
+    
+    # Spectral visualization
+    'visualize_spectral_analysis',
+    'print_spectral_statistics',
+    
+    # Comparative visualization
+    'visualize_comparative_analysis',
+    'print_comparative_summary'
 ]

@@ -27,7 +27,7 @@ import warnings
 import logging
 
 # Import modular visualization components
-from .viz_modules_2 import (
+from ..viz_modules_2 import (
     VisualizationMixin,
     visualize_training_progress,
     visualize_reservoir_dynamics_advanced,
@@ -36,7 +36,7 @@ from .viz_modules_2 import (
 )
 
 # Import original viz_modules for backward compatibility
-from .viz_modules import (
+from ..viz_modules import (
     visualize_reservoir_structure,
     visualize_reservoir_dynamics,
     visualize_performance_analysis,
@@ -52,7 +52,7 @@ from .viz_modules import (
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Set professional plotting style
+# Configure seaborn plotting style for consistent visualization
 try:
     plt.style.use('seaborn-v0_8-whitegrid')
     sns.set_palette("husl")
