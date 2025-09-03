@@ -1,80 +1,50 @@
 """
-🎨 Reservoir Computing Visualization Suite
-==========================================
+🎨 Modular Visualization Interface - Complete Reservoir Computing Visualization Suite
+====================================================================================
 
 Author: Benedict Chen (benedict@benedictchen.com)
 
-This module provides comprehensive visualization tools for analyzing Echo State Networks
-and reservoir computing systems, offering professional-grade plotting capabilities for
-research analysis and publication-quality figures.
+This module provides a consolidated interface to all visualization capabilities
+for reservoir computing systems, combining multiple modular components while
+maintaining full backward compatibility with the original viz.py interface.
 
-🔬 Research Foundation:
-======================
+🏗️ **Modular Architecture:**
+This interface combines specialized visualization modules:
+- structure_visualization.py - Reservoir architecture analysis
+- dynamics_visualization.py - Temporal behavior analysis
+- performance_visualization.py - Model quality assessment
+- Additional specialized modules for complete coverage
 
-Visualization techniques are based on foundational reservoir computing research:
+📊 **Key Features:**
+- 100% backward compatibility with original viz.py
+- Modular design for maintainability and testing
+- Professional publication-quality visualizations
+- Research-accurate implementations of standard methods
+- Interactive capabilities and export options
 
-1. **Jaeger, H. (2001)** - Original ESN visualization methods for spectral analysis
-2. **Lukoševičius, M. & Jaeger, H. (2009)** - Reservoir computing survey with analysis methods
-3. **Verstraeten, D. et al. (2007)** - Memory capacity visualization techniques
-4. **Schrauwen, B. et al. (2007)** - Network topology analysis for reservoir computing
-5. **Appeltant, L. et al. (2011)** - Information processing capacity visualization
-
-🎯 Visualization Categories:
-============================
-
-1. **Reservoir Structure Analysis**
-   - Weight matrix visualization with statistical overlays
-   - Eigenvalue spectrum analysis with stability regions
-   - Network topology and connectivity patterns
-   - Degree distribution and topological properties
-
-2. **Dynamic Behavior Analysis**
-   - State evolution heatmaps and trajectories
-   - Temporal correlation analysis and autocorrelation
-   - Activity pattern analysis and phase space plots
-   - Power spectral density of reservoir dynamics
-
-3. **Performance Visualization**
-   - Training curves and learning dynamics
-   - Prediction quality analysis and error distributions
-   - Memory capacity benchmarks and nonlinear tasks
-   - Cross-validation results and statistical validation
-
-4. **Comparative Analysis**
-   - Multi-configuration performance comparison
-   - Parameter sensitivity analysis
-   - Ranking and optimization results
-   - Statistical significance testing
-
-5. **Advanced Spectral Analysis**
-   - Eigenvalue decomposition and stability analysis
-   - Singular value spectrum and condition numbers
-   - Effective dimensionality and rank analysis
-   - Lyapunov exponent visualization
-
-🎨 Professional Standards:
-==========================
-- High-resolution vector graphics (300 DPI+)
-- Perceptually uniform colormaps (viridis, plasma)
-- Comprehensive legends and statistical annotations
-- Publication-ready formatting and typography
-- Interactive capabilities where beneficial
-
-📊 Key Features:
-===============
-- Research-accurate implementations of standard visualization methods
-- Statistical overlays and confidence intervals
-- Animation support for dynamic behavior
-- Comparative analysis across multiple configurations
-- Export capabilities for publications
-
-References:
-----------
-- Jaeger, H. (2001). "The 'echo state' approach to analysing and training RNNs"
-- Lukoševičius, M. (2012). "A practical guide to applying echo state networks"
-- Dambre, J., et al. (2012). "Information processing capacity of dynamical systems"
-- Verstraeten, D., et al. (2007). "An experimental unification of reservoir computing methods"
+🔬 **Research Foundation:**
+All visualizations are based on established reservoir computing research:
+- Jaeger, H. (2001) - Original ESN analysis methods
+- Lukoševičius, M. & Jaeger, H. (2009) - Comprehensive survey methods
+- Verstraeten, D. et al. (2007) - Memory capacity visualization
+- Modern reservoir computing visualization best practices
 """
+
+# Import all modular visualization components
+from .viz_modules.structure_visualization import (
+    visualize_reservoir_structure,
+    print_reservoir_statistics
+)
+
+from .viz_modules.dynamics_visualization import (
+    visualize_reservoir_dynamics,
+    print_dynamics_statistics  
+)
+
+from .viz_modules.performance_visualization import (
+    visualize_performance_analysis,
+    print_performance_statistics
+)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -83,14 +53,9 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.animation import FuncAnimation
 import seaborn as sns
 from scipy import signal, stats
-from scipy.spatial.distance import pdist, squareform
-from scipy.cluster.hierarchy import linkage, dendrogram
 import networkx as nx
 from typing import Optional, Tuple, Dict, Any, List, Union, Callable
 import warnings
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
 import pandas as pd
 import logging
 
@@ -102,668 +67,6 @@ sns.set_palette("husl")
 logger = logging.getLogger(__name__)
 
 
-# ================================
-# RESERVOIR STRUCTURE VISUALIZATION
-# ================================
-
-def visualize_reservoir_structure(reservoir_weights: np.ndarray, 
-                                 sparsity: float,
-                                 figsize: Tuple[int, int] = (15, 10),
-                                 save_path: Optional[str] = None) -> None:
-    """
-    Comprehensive reservoir structure visualization with statistical analysis.
-    
-    🔬 **Research Background:**
-    Visualization of reservoir connectivity patterns based on Jaeger (2001) original
-    methods extended with modern graph theory analysis and spectral properties.
-    
-    **Key Visualizations:**
-    1. **Weight Matrix Heatmap**: Full connectivity pattern with statistical overlays
-    2. **Eigenvalue Spectrum**: Complex plane analysis with stability regions
-    3. **Degree Distribution**: Connection pattern statistics and fits
-    4. **Weight Distribution**: Statistical analysis of connection strengths
-    5. **Network Topology**: Graph visualization for manageable sizes
-    6. **Spectral Properties**: Phase distribution and magnitude analysis
-    
-    Args:
-        reservoir_weights: Reservoir weight matrix (n_reservoir × n_reservoir)
-        sparsity: Target sparsity level for reference
-        figsize: Figure size for the visualization
-        save_path: Optional path to save the visualization
-        
-    References:
-        - Jaeger, H. (2001). "The 'echo state' approach to analysing and training RNNs"
-        - Newman, M.E.J. (2003). "The structure and function of complex networks"
-    """
-    fig, axes = plt.subplots(2, 3, figsize=figsize)
-    fig.suptitle('Echo State Network Reservoir Analysis', fontsize=16, fontweight='bold')
-    
-    n_reservoir = reservoir_weights.shape[0]
-    
-    # 1. Enhanced Reservoir connectivity matrix
-    ax1 = axes[0, 0]
-    im1 = ax1.imshow(reservoir_weights, cmap='RdBu_r', aspect='auto', 
-                    vmin=-np.max(np.abs(reservoir_weights)), 
-                    vmax=np.max(np.abs(reservoir_weights)))
-    ax1.set_title(f'Reservoir Matrix ({n_reservoir}×{n_reservoir})\n'
-                 f'Density: {np.mean(reservoir_weights != 0):.1%}')
-    ax1.set_xlabel('From Neuron')
-    ax1.set_ylabel('To Neuron')
-    cbar1 = plt.colorbar(im1, ax=ax1, shrink=0.8)
-    cbar1.set_label('Connection Strength', rotation=270, labelpad=15)
-    
-    # 2. Enhanced eigenvalue analysis with stability regions
-    eigenvals = np.linalg.eigvals(reservoir_weights)
-    ax2 = axes[0, 1]
-    scatter = ax2.scatter(eigenvals.real, eigenvals.imag, alpha=0.7, 
-                        c=np.abs(eigenvals), cmap='viridis', s=30)
-    
-    # Unit circle for stability
-    circle = plt.Circle((0, 0), 1, fill=False, color='red', linestyle='--', linewidth=2)
-    ax2.add_patch(circle)
-    
-    # Echo state property region
-    max_eigenval = np.max(np.abs(eigenvals))
-    ax2.axhline(y=0, color='k', linestyle='-', alpha=0.3)
-    ax2.axvline(x=0, color='k', linestyle='-', alpha=0.3)
-    
-    ax2.set_title(f'Eigenvalue Spectrum\nSpectral Radius: {max_eigenval:.4f}')
-    ax2.set_xlabel('Real Part')
-    ax2.set_ylabel('Imaginary Part')
-    ax2.axis('equal')
-    ax2.grid(True, alpha=0.3)
-    plt.colorbar(scatter, ax=ax2, shrink=0.8, label='|λ|')
-    
-    # Add stability annotation
-    if max_eigenval < 1:
-        ax2.text(0.02, 0.98, '✓ Echo State Property', transform=ax2.transAxes,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor='lightgreen', alpha=0.7),
-                verticalalignment='top')
-    else:
-        ax2.text(0.02, 0.98, '⚠ Unstable Regime', transform=ax2.transAxes,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor='lightcoral', alpha=0.7),
-                verticalalignment='top')
-    
-    # 3. Advanced connection analysis
-    degrees = np.sum(reservoir_weights != 0, axis=1)
-    ax3 = axes[0, 2]
-    
-    # Histogram with statistical overlay
-    n, bins, patches = ax3.hist(degrees, bins=20, alpha=0.7, edgecolor='black', density=True)
-    
-    # Add normal distribution overlay
-    if len(degrees) > 1:
-        mu, sigma = stats.norm.fit(degrees)
-        x = np.linspace(degrees.min(), degrees.max(), 100)
-        ax3.plot(x, stats.norm.pdf(x, mu, sigma), 'r-', linewidth=2, 
-                label=f'Normal fit (μ={mu:.1f}, σ={sigma:.1f})')
-    
-    ax3.set_title(f'Degree Distribution\nSparsity: {sparsity:.1%}')
-    ax3.set_xlabel('Number of Connections')
-    ax3.set_ylabel('Probability Density')
-    ax3.legend()
-    ax3.grid(True, alpha=0.3)
-    
-    # 4. Weight distribution with statistical analysis
-    weights = reservoir_weights[reservoir_weights != 0]
-    ax4 = axes[1, 0]
-    
-    if len(weights) > 0:
-        # Enhanced histogram with statistics
-        n, bins, patches = ax4.hist(weights, bins=50, alpha=0.7, edgecolor='black', density=True)
-        
-        # Add statistical overlays
-        ax4.axvline(weights.mean(), color='red', linestyle='--', linewidth=2, 
-                   label=f'Mean: {weights.mean():.3f}')
-        ax4.axvline(np.median(weights), color='orange', linestyle='--', linewidth=2, 
-                   label=f'Median: {np.median(weights):.3f}')
-        
-        ax4.set_title('Weight Distribution Analysis')
-        ax4.set_xlabel('Weight Value')
-        ax4.set_ylabel('Probability Density')
-        ax4.legend()
-        ax4.grid(True, alpha=0.3)
-        
-        # Add text box with statistics
-        stats_text = f'Std: {weights.std():.3f}\nSkew: {stats.skew(weights):.3f}\nKurt: {stats.kurtosis(weights):.3f}'
-        ax4.text(0.02, 0.98, stats_text, transform=ax4.transAxes,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
-                verticalalignment='top', fontsize=9)
-    else:
-        ax4.text(0.5, 0.5, 'No connections found', ha='center', va='center', 
-                transform=ax4.transAxes)
-        ax4.set_title('Weight Distribution Analysis')
-    
-    # 5. Network topology visualization
-    ax5 = axes[1, 1]
-    if n_reservoir <= 100:  # Only for manageable sizes
-        try:
-            # Create networkx graph
-            G = nx.from_numpy_array(reservoir_weights, create_using=nx.DiGraph)
-            pos = nx.spring_layout(G, k=1/np.sqrt(n_reservoir), iterations=50)
-            
-            # Draw network with edge weights
-            edges = G.edges()
-            weights_nx = [G[u][v]['weight'] for u, v in edges]
-            
-            nx.draw_networkx_nodes(G, pos, node_color='lightblue', 
-                                 node_size=50, alpha=0.8, ax=ax5)
-            if len(weights_nx) > 0:
-                nx.draw_networkx_edges(G, pos, edge_color=weights_nx, edge_cmap=plt.cm.RdBu_r,
-                                     width=[abs(w)*3 for w in weights_nx], alpha=0.6, ax=ax5)
-            
-            ax5.set_title('Network Topology\n(Spring Layout)')
-        except Exception as e:
-            logger.warning(f"Network visualization failed: {e}")
-            ax5.text(0.5, 0.5, 'Network visualization\nfailed', ha='center', va='center', 
-                    transform=ax5.transAxes)
-            ax5.set_title('Network Topology')
-    else:
-        # For large networks, show connection pattern heatmap
-        sample_size = min(50, n_reservoir)
-        indices = np.random.choice(n_reservoir, sample_size, replace=False)
-        sample_matrix = reservoir_weights[np.ix_(indices, indices)]
-        
-        im5 = ax5.imshow(sample_matrix, cmap='RdBu_r', aspect='auto')
-        ax5.set_title(f'Connection Pattern\n(Random {sample_size}×{sample_size} Sample)')
-        plt.colorbar(im5, ax=ax5, shrink=0.6)
-    
-    ax5.axis('off')
-    
-    # 6. Spectral analysis - eigenvalue phase distribution
-    ax6 = axes[1, 2]
-    eigenval_phases = np.angle(eigenvals)
-    
-    # Polar histogram of eigenvalue phases
-    ax6_polar = plt.subplot(2, 3, 6, projection='polar')
-    ax6_polar.hist(eigenval_phases, bins=20, alpha=0.7)
-    ax6_polar.set_title('Eigenvalue Phase Distribution')
-    ax6_polar.set_theta_zero_location('E')
-    
-    plt.tight_layout()
-    
-    # Save if requested
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    
-    plt.show()
-    
-    # Print comprehensive statistics
-    print_reservoir_statistics(reservoir_weights, eigenvals, degrees, weights, sparsity)
-
-
-# ================================
-# DYNAMIC BEHAVIOR VISUALIZATION
-# ================================
-
-def visualize_reservoir_dynamics(states: np.ndarray, 
-                               inputs: Optional[np.ndarray] = None, 
-                               outputs: Optional[np.ndarray] = None, 
-                               figsize: Tuple[int, int] = (15, 10),
-                               save_path: Optional[str] = None) -> None:
-    """
-    Comprehensive visualization of reservoir dynamics and temporal behavior.
-    
-    🔬 **Research Background:**
-    Analysis of reservoir state evolution based on dynamical systems theory
-    and nonlinear time series analysis methods applied to reservoir computing.
-    
-    **Key Visualizations:**
-    1. **State Evolution Heatmap**: Temporal activity patterns across neurons
-    2. **State Trajectory (PCA)**: Reduced-dimensional state space analysis
-    3. **Activity Statistics**: Mean vs. variance analysis of neural activity
-    4. **Temporal Autocorrelation**: Memory characteristics and decay
-    5. **Input-State Correlation**: Cross-correlation analysis
-    6. **Power Spectral Density**: Frequency domain analysis of dynamics
-    
-    Args:
-        states: Reservoir state matrix (time_steps × n_reservoir)
-        inputs: Input sequence (time_steps × n_inputs) [optional]
-        outputs: Output sequence (time_steps × n_outputs) [optional]
-        figsize: Figure size for the visualization
-        save_path: Optional path to save the visualization
-        
-    References:
-        - Jaeger, H. (2001). "Short term memory in echo state networks"
-        - Verstraeten, D., et al. (2007). "An experimental unification of reservoir computing methods"
-    """
-    fig = plt.figure(figsize=figsize)
-    fig.suptitle('Echo State Network Dynamics Analysis', fontsize=16, fontweight='bold')
-    
-    # 1. State evolution heatmap
-    ax1 = plt.subplot(2, 3, 1)
-    
-    # Sample neurons for visualization if too many
-    max_neurons_display = 50
-    if states.shape[1] > max_neurons_display:
-        neuron_indices = np.random.choice(states.shape[1], max_neurons_display, replace=False)
-        display_states = states[:, neuron_indices]
-        title_suffix = f" (Random {max_neurons_display} neurons)"
-    else:
-        display_states = states
-        neuron_indices = np.arange(states.shape[1])
-        title_suffix = ""
-        
-    im1 = ax1.imshow(display_states.T, cmap='viridis', aspect='auto', interpolation='nearest')
-    ax1.set_title(f'State Evolution{title_suffix}')
-    ax1.set_xlabel('Time Step')
-    ax1.set_ylabel('Neuron Index')
-    plt.colorbar(im1, ax=ax1, shrink=0.8, label='Activation')
-    
-    # 2. State trajectory in reduced space (PCA)
-    ax2 = plt.subplot(2, 3, 2)
-    if states.shape[1] >= 3:
-        try:
-            pca = PCA(n_components=3)
-            states_pca = pca.fit_transform(states)
-            
-            # 3D trajectory
-            ax2 = plt.subplot(2, 3, 2, projection='3d')
-            scatter = ax2.scatter(states_pca[:, 0], states_pca[:, 1], states_pca[:, 2],
-                                c=np.arange(len(states_pca)), cmap='plasma', s=20)
-            ax2.set_title(f'State Trajectory (PCA)\nVariance Explained: {pca.explained_variance_ratio_[:3].sum():.1%}')
-            ax2.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
-            ax2.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
-            ax2.set_zlabel(f'PC3 ({pca.explained_variance_ratio_[2]:.1%})')
-            plt.colorbar(scatter, ax=ax2, shrink=0.5, label='Time')
-        except Exception as e:
-            logger.warning(f"PCA visualization failed: {e}")
-            ax2.text(0.5, 0.5, 'PCA visualization\nfailed', ha='center', va='center', 
-                    transform=ax2.transAxes)
-            ax2.set_title('State Trajectory (PCA)')
-    else:
-        ax2.text(0.5, 0.5, 'Insufficient dimensions\nfor PCA visualization', 
-                ha='center', va='center', transform=ax2.transAxes)
-        ax2.set_title('State Trajectory (PCA)')
-    
-    # 3. Activity patterns
-    ax3 = plt.subplot(2, 3, 3)
-    
-    # Calculate and plot activity statistics
-    mean_activity = np.mean(states, axis=0)
-    std_activity = np.std(states, axis=0)
-    
-    ax3.scatter(mean_activity, std_activity, alpha=0.6, s=30)
-    ax3.set_xlabel('Mean Activity')
-    ax3.set_ylabel('Activity Std')
-    ax3.set_title('Neuron Activity Statistics')
-    ax3.grid(True, alpha=0.3)
-    
-    # Add correlation coefficient
-    if len(mean_activity) > 1:
-        corr_coef = np.corrcoef(mean_activity, std_activity)[0, 1]
-        ax3.text(0.02, 0.98, f'Correlation: {corr_coef:.3f}', 
-                transform=ax3.transAxes, bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
-                verticalalignment='top')
-    
-    # 4. Temporal correlation analysis
-    ax4 = plt.subplot(2, 3, 4)
-    
-    # Compute autocorrelation for sample of neurons
-    max_lag = min(50, states.shape[0] // 4)
-    sample_neurons = min(10, states.shape[1])
-    autocorrs = []
-    
-    for i in range(sample_neurons):
-        if states.shape[0] > max_lag:
-            autocorr = np.correlate(states[:, i], states[:, i], mode='full')
-            autocorr = autocorr[len(autocorr)//2:][:max_lag]
-            if autocorr[0] != 0:
-                autocorr = autocorr / autocorr[0]  # Normalize
-            autocorrs.append(autocorr)
-    
-    if autocorrs:
-        # Plot mean autocorrelation with confidence bands
-        mean_autocorr = np.mean(autocorrs, axis=0)
-        std_autocorr = np.std(autocorrs, axis=0)
-        lags = np.arange(len(mean_autocorr))
-        
-        ax4.plot(lags, mean_autocorr, 'b-', linewidth=2, label='Mean')
-        ax4.fill_between(lags, mean_autocorr - std_autocorr, mean_autocorr + std_autocorr, 
-                        alpha=0.3, label='±1 Std')
-        ax4.axhline(y=0, color='k', linestyle='--', alpha=0.5)
-        ax4.set_title('Temporal Autocorrelation')
-        ax4.set_xlabel('Lag (time steps)')
-        ax4.set_ylabel('Autocorrelation')
-        ax4.legend()
-        ax4.grid(True, alpha=0.3)
-    else:
-        ax4.text(0.5, 0.5, 'Insufficient data for\nautocorrelation analysis', 
-                ha='center', va='center', transform=ax4.transAxes)
-        ax4.set_title('Temporal Autocorrelation')
-    
-    # 5. Input-State relationship (if inputs provided)
-    ax5 = plt.subplot(2, 3, 5)
-    if inputs is not None:
-        try:
-            # Cross-correlation between input and reservoir states
-            sample_size = min(100, states.shape[0])
-            indices = np.random.choice(states.shape[0], sample_size, replace=False)
-            
-            input_sample = inputs[indices] if inputs.ndim > 1 else inputs[indices].reshape(-1, 1)
-            state_sample = states[indices]
-            
-            # Calculate cross-correlation matrix
-            n_inputs = input_sample.shape[1]
-            n_display_neurons = min(20, states.shape[1])
-            
-            if n_inputs > 0 and n_display_neurons > 0:
-                cross_corr = np.corrcoef(input_sample.T, state_sample[:, :n_display_neurons].T)[:n_inputs, n_inputs:]
-                
-                im5 = ax5.imshow(cross_corr, cmap='RdBu_r', aspect='auto', 
-                               vmin=-1, vmax=1)
-                ax5.set_title('Input-State Cross-correlation')
-                ax5.set_xlabel('Reservoir Neurons')
-                ax5.set_ylabel('Input Dimensions')
-                plt.colorbar(im5, ax=ax5, shrink=0.8, label='Correlation')
-            else:
-                ax5.text(0.5, 0.5, 'Invalid input dimensions', ha='center', va='center', 
-                        transform=ax5.transAxes)
-                ax5.set_title('Input-State Relationship')
-        except Exception as e:
-            logger.warning(f"Input-state correlation failed: {e}")
-            ax5.text(0.5, 0.5, 'Cross-correlation\nanalysis failed', ha='center', va='center', 
-                    transform=ax5.transAxes)
-            ax5.set_title('Input-State Relationship')
-    else:
-        ax5.text(0.5, 0.5, 'No input data\nprovided', ha='center', va='center', 
-                transform=ax5.transAxes)
-        ax5.set_title('Input-State Relationship')
-    
-    # 6. Spectral analysis of dynamics
-    ax6 = plt.subplot(2, 3, 6)
-    
-    # Power spectral density of sample neurons
-    sample_neurons = min(5, states.shape[1])
-    frequencies = []
-    power_spectra = []
-    
-    for i in range(sample_neurons):
-        if len(states[:, i]) > 10:  # Ensure sufficient data
-            try:
-                f, Pxx = signal.periodogram(states[:, i], nperseg=min(256, len(states)//4))
-                frequencies.append(f)
-                power_spectra.append(Pxx)
-            except Exception as e:
-                logger.warning(f"Periodogram computation failed for neuron {i}: {e}")
-    
-    if power_spectra:
-        mean_spectrum = np.mean(power_spectra, axis=0)
-        std_spectrum = np.std(power_spectra, axis=0)
-        
-        ax6.loglog(frequencies[0], mean_spectrum, 'b-', linewidth=2, label='Mean PSD')
-        ax6.fill_between(frequencies[0], 
-                       np.maximum(mean_spectrum - std_spectrum, 1e-10),
-                       mean_spectrum + std_spectrum, 
-                       alpha=0.3, label='±1 Std')
-        ax6.set_title('Power Spectral Density')
-        ax6.set_xlabel('Frequency (normalized)')
-        ax6.set_ylabel('Power')
-        ax6.legend()
-        ax6.grid(True, alpha=0.3)
-    else:
-        ax6.text(0.5, 0.5, 'Insufficient data\nfor spectral analysis', 
-                ha='center', va='center', transform=ax6.transAxes)
-        ax6.set_title('Power Spectral Density')
-    
-    plt.tight_layout()
-    
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
-    plt.show()
-    
-    # Print dynamics statistics
-    print_dynamics_statistics(states, inputs, outputs)
-
-
-# ================================
-# PERFORMANCE VISUALIZATION
-# ================================
-
-def visualize_performance_analysis(predictions: np.ndarray, 
-                                  targets: np.ndarray,
-                                  inputs: Optional[np.ndarray] = None, 
-                                  figsize: Tuple[int, int] = (15, 10),
-                                  save_path: Optional[str] = None) -> None:
-    """
-    Comprehensive performance analysis visualization.
-    
-    🔬 **Research Background:**
-    Performance visualization methods based on regression analysis, time series
-    evaluation, and statistical validation techniques for reservoir computing.
-    
-    **Key Visualizations:**
-    1. **Prediction vs Target**: Scatter plot with perfect prediction line and R²
-    2. **Time Series Comparison**: Temporal alignment of predictions and targets
-    3. **Error Distribution**: Statistical analysis of prediction errors
-    4. **Error Evolution**: Temporal analysis of error patterns
-    5. **Residual Autocorrelation**: Detection of systematic prediction biases
-    6. **Error by Magnitude**: Performance analysis across prediction ranges
-    
-    Args:
-        predictions: Model predictions
-        targets: True target values
-        inputs: Input sequence [optional]
-        figsize: Figure size for the visualization
-        save_path: Optional path to save the visualization
-        
-    References:
-        - Jaeger, H. (2007). "Echo state network"
-        - Lukoševičius, M. (2012). "A practical guide to applying echo state networks"
-    """
-    fig, axes = plt.subplots(2, 3, figsize=figsize)
-    fig.suptitle('Performance Analysis and Prediction Quality', fontsize=16, fontweight='bold')
-    
-    # Calculate errors
-    errors = predictions - targets
-    mse = np.mean(errors**2)
-    mae = np.mean(np.abs(errors))
-    
-    # 1. Prediction vs Target scatter plot
-    ax1 = axes[0, 0]
-    
-    # Handle multi-dimensional outputs
-    if predictions.ndim > 1 and predictions.shape[1] > 1:
-        pred_plot = predictions[:, 0]
-        target_plot = targets[:, 0]
-    else:
-        pred_plot = predictions.flatten()
-        target_plot = targets.flatten()
-    
-    ax1.scatter(target_plot, pred_plot, alpha=0.6, s=20)
-    
-    # Perfect prediction line
-    min_val, max_val = min(target_plot.min(), pred_plot.min()), max(target_plot.max(), pred_plot.max())
-    ax1.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2, label='Perfect Prediction')
-    
-    # Calculate R²
-    if len(target_plot) > 1:
-        ss_res = np.sum((target_plot - pred_plot)**2)
-        ss_tot = np.sum((target_plot - np.mean(target_plot))**2)
-        r2 = 1 - (ss_res / (ss_tot + 1e-8))
-    else:
-        r2 = 0.0
-    
-    ax1.set_xlabel('True Values')
-    ax1.set_ylabel('Predictions')
-    ax1.set_title(f'Prediction Quality\nR² = {r2:.4f}')
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
-    
-    # Add statistics box
-    stats_text = f'MSE: {mse:.6f}\nMAE: {mae:.6f}\nR²: {r2:.4f}'
-    ax1.text(0.02, 0.98, stats_text, transform=ax1.transAxes,
-            bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
-            verticalalignment='top', fontsize=9)
-    
-    # 2. Time series comparison
-    ax2 = axes[0, 1]
-    
-    # Show a subset for clarity
-    display_length = min(200, len(predictions))
-    indices = np.linspace(0, len(predictions)-1, display_length).astype(int)
-    
-    ax2.plot(indices, target_plot[indices], 'b-', linewidth=2, label='True', alpha=0.8)
-    ax2.plot(indices, pred_plot[indices], 'r--', linewidth=2, label='Predicted', alpha=0.8)
-    ax2.fill_between(indices, target_plot[indices], pred_plot[indices], alpha=0.3, color='gray')
-    
-    ax2.set_xlabel('Time Step')
-    ax2.set_ylabel('Value')
-    ax2.set_title(f'Time Series Comparison\n(Showing {display_length} points)')
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
-    
-    # 3. Error distribution analysis
-    ax3 = axes[0, 2]
-    
-    error_flat = errors.flatten()
-    
-    if len(error_flat) > 1:
-        # Histogram with statistical overlays
-        n, bins, patches = ax3.hist(error_flat, bins=50, alpha=0.7, density=True, edgecolor='black')
-        
-        # Fit normal distribution
-        mu, sigma = stats.norm.fit(error_flat)
-        x = np.linspace(error_flat.min(), error_flat.max(), 100)
-        ax3.plot(x, stats.norm.pdf(x, mu, sigma), 'r-', linewidth=2, 
-                label=f'Normal fit\n(μ={mu:.4f}, σ={sigma:.4f})')
-        
-        # Add zero line
-        ax3.axvline(x=0, color='green', linestyle='--', linewidth=2, label='Zero Error')
-        
-        ax3.set_xlabel('Prediction Error')
-        ax3.set_ylabel('Density')
-        ax3.set_title('Error Distribution')
-        ax3.legend()
-        ax3.grid(True, alpha=0.3)
-    else:
-        ax3.text(0.5, 0.5, 'Insufficient data\nfor error distribution', 
-                ha='center', va='center', transform=ax3.transAxes)
-        ax3.set_title('Error Distribution')
-    
-    # 4. Error evolution over time
-    ax4 = axes[1, 0]
-    
-    # Calculate rolling statistics
-    if len(error_flat) > 10:
-        window_size = max(1, len(error_flat) // 50)
-        rolling_mse = pd.Series(error_flat**2).rolling(window=window_size).mean()
-        rolling_mae = pd.Series(np.abs(error_flat)).rolling(window=window_size).mean()
-        
-        ax4.plot(rolling_mse, label=f'Rolling MSE (window={window_size})', linewidth=2)
-        ax4.plot(rolling_mae, label=f'Rolling MAE (window={window_size})', linewidth=2)
-    else:
-        ax4.plot(error_flat**2, label='Squared Error', linewidth=1, alpha=0.7)
-        ax4.plot(np.abs(error_flat), label='Absolute Error', linewidth=1, alpha=0.7)
-    
-    ax4.set_xlabel('Time Step')
-    ax4.set_ylabel('Error')
-    ax4.set_title('Error Evolution')
-    ax4.legend()
-    ax4.grid(True, alpha=0.3)
-    
-    # 5. Residuals autocorrelation
-    ax5 = axes[1, 1]
-    
-    # Autocorrelation of residuals
-    max_lag = min(50, len(error_flat) // 4)
-    if max_lag > 1 and len(error_flat) > max_lag:
-        try:
-            autocorr = np.correlate(error_flat, error_flat, mode='full')
-            autocorr = autocorr[len(autocorr)//2:][:max_lag]
-            if autocorr[0] != 0:
-                autocorr = autocorr / autocorr[0]  # Normalize
-            
-            lags = np.arange(len(autocorr))
-            ax5.plot(lags, autocorr, 'b-', linewidth=2, marker='o', markersize=4)
-            ax5.axhline(y=0, color='k', linestyle='--', alpha=0.5)
-            
-            # Add confidence bands (approximate)
-            n_samples = len(error_flat)
-            conf_interval = 1.96 / np.sqrt(n_samples)
-            ax5.axhline(y=conf_interval, color='r', linestyle=':', alpha=0.7, label='95% Confidence')
-            ax5.axhline(y=-conf_interval, color='r', linestyle=':', alpha=0.7)
-            
-            ax5.set_xlabel('Lag')
-            ax5.set_ylabel('Autocorrelation')
-            ax5.set_title('Residual Autocorrelation')
-            ax5.legend()
-            ax5.grid(True, alpha=0.3)
-        except Exception as e:
-            logger.warning(f"Autocorrelation computation failed: {e}")
-            ax5.text(0.5, 0.5, 'Autocorrelation\ncomputation failed', 
-                    ha='center', va='center', transform=ax5.transAxes)
-            ax5.set_title('Residual Autocorrelation')
-    else:
-        ax5.text(0.5, 0.5, 'Insufficient data\nfor autocorrelation', 
-                ha='center', va='center', transform=ax5.transAxes)
-        ax5.set_title('Residual Autocorrelation')
-    
-    # 6. Performance by prediction magnitude
-    ax6 = axes[1, 2]
-    
-    # Bin predictions by magnitude and show average error
-    if len(pred_plot) > 20:  # Ensure sufficient data
-        try:
-            n_bins = 10
-            bin_edges = np.linspace(pred_plot.min(), pred_plot.max(), n_bins + 1)
-            bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-            
-            bin_errors = []
-            bin_counts = []
-            
-            for i in range(n_bins):
-                mask = (pred_plot >= bin_edges[i]) & (pred_plot < bin_edges[i + 1])
-                if i == n_bins - 1:  # Include right edge for last bin
-                    mask = (pred_plot >= bin_edges[i]) & (pred_plot <= bin_edges[i + 1])
-                
-                if np.sum(mask) > 0:
-                    bin_errors.append(np.mean(np.abs(error_flat[mask])))
-                    bin_counts.append(np.sum(mask))
-                else:
-                    bin_errors.append(0)
-                    bin_counts.append(0)
-            
-            # Bar plot
-            ax6.bar(bin_centers, bin_errors, width=np.diff(bin_edges)[0]*0.8, 
-                   alpha=0.7, edgecolor='black')
-            
-            ax6.set_xlabel('Prediction Magnitude')
-            ax6.set_ylabel('Mean Absolute Error')
-            ax6.set_title('Error vs Prediction Magnitude')
-            ax6.grid(True, alpha=0.3)
-            
-            # Add sample count as text
-            for i, (center, count) in enumerate(zip(bin_centers, bin_counts)):
-                if count > 0:
-                    ax6.text(center, bin_errors[i], str(count), 
-                           ha='center', va='bottom', fontsize=8)
-        except Exception as e:
-            logger.warning(f"Magnitude analysis failed: {e}")
-            ax6.text(0.5, 0.5, 'Magnitude analysis\nfailed', 
-                    ha='center', va='center', transform=ax6.transAxes)
-            ax6.set_title('Error vs Prediction Magnitude')
-    else:
-        ax6.text(0.5, 0.5, 'Insufficient data\nfor magnitude analysis', 
-                ha='center', va='center', transform=ax6.transAxes)
-        ax6.set_title('Error vs Prediction Magnitude')
-    
-    plt.tight_layout()
-    
-    if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
-    plt.show()
-    
-    # Print comprehensive performance statistics
-    print_performance_statistics(predictions, targets, errors)
-
-
-# ================================
-# COMPARATIVE ANALYSIS VISUALIZATION
-# ================================
-
 def visualize_comparative_analysis(results: Dict[str, Dict[str, Any]], 
                                   figsize: Tuple[int, int] = (16, 10),
                                   save_path: Optional[str] = None) -> None:
@@ -771,800 +74,773 @@ def visualize_comparative_analysis(results: Dict[str, Dict[str, Any]],
     Compare multiple ESN configurations or experiments.
     
     🔬 **Research Background:**
-    Comparative analysis methods for reservoir computing based on statistical
-    validation, parameter sensitivity analysis, and multi-objective optimization.
+    Multi-configuration comparison methods based on statistical analysis and
+    visualization techniques for parameter sensitivity and performance evaluation.
     
     **Key Visualizations:**
-    1. **Performance Comparison**: Bar charts of key metrics across configurations
-    2. **Parameter Sensitivity**: Scatter plots showing parameter-performance relationships
-    3. **Overall Ranking**: Composite scoring and ranking of configurations
-    4. **Training Efficiency**: Trade-off between training time and performance
-    5. **Stability Analysis**: Spectral radius vs. performance relationships
-    6. **Memory Capacity**: Comparison of temporal processing capabilities
+    1. **Performance Ranking**: Bar chart of configurations by performance metrics
+    2. **Parameter Correlation**: Heatmap showing parameter-performance relationships
+    3. **Distribution Comparison**: Box plots of performance distributions
+    4. **Convergence Analysis**: Learning curves across configurations
+    5. **Statistical Significance**: Statistical tests and confidence intervals
+    6. **Parameter Space**: Scatter plot matrix of key parameters vs performance
     
     Args:
-        results: Dictionary with experiment names as keys and result dictionaries as values
+        results: Dictionary with configuration names as keys and results as values
+                Each result should contain metrics like 'mse', 'r2', 'parameters', etc.
         figsize: Figure size for the visualization
         save_path: Optional path to save the visualization
         
-    References:
-        - Lukoševičius, M. (2012). "A practical guide to applying echo state networks"
-        - Dambre, J., et al. (2012). "Information processing capacity of dynamical systems"
+    Example:
+        results = {
+            'config_1': {'mse': 0.001, 'r2': 0.95, 'spectral_radius': 0.9},
+            'config_2': {'mse': 0.002, 'r2': 0.92, 'spectral_radius': 1.1},
+            # ... more configurations
+        }
+        visualize_comparative_analysis(results)
     """
-    fig, axes = plt.subplots(2, 3, figsize=figsize)
-    fig.suptitle('Comparative Analysis Across Configurations', fontsize=16, fontweight='bold')
-    
-    # Extract data for plotting
-    experiment_names = list(results.keys())
-    n_experiments = len(experiment_names)
-    
-    if n_experiments < 2:
-        fig.text(0.5, 0.5, 'At least 2 experiments required for comparative analysis', 
-                ha='center', va='center', fontsize=14)
-        plt.show()
+    if not results:
+        print("⚠️ No results provided for comparison")
         return
     
-    # Collect metrics
-    metrics = {}
-    params = {}
+    fig, axes = plt.subplots(2, 3, figsize=figsize)
+    fig.suptitle('Comparative Analysis of ESN Configurations', fontsize=16, fontweight='bold')
     
-    for name, result in results.items():
-        for key, value in result.items():
-            if key not in ['params'] and isinstance(value, (int, float)):
-                if key not in metrics:
-                    metrics[key] = {}
-                metrics[key][name] = value
-            elif key == 'params':
-                params[name] = value
+    config_names = list(results.keys())
+    n_configs = len(config_names)
     
-    # 1. Performance comparison
+    # Extract common metrics
+    metrics_available = set()
+    for result in results.values():
+        metrics_available.update(result.keys())
+    
+    # 1. Performance ranking
     ax1 = axes[0, 0]
-    
-    performance_metrics = ['mse', 'mae', 'r2']
-    available_metrics = [m for m in performance_metrics if m in metrics]
-    
-    if available_metrics:
-        x_pos = np.arange(n_experiments)
-        width = 0.25
+    if 'mse' in metrics_available:
+        mse_values = [results[name].get('mse', float('inf')) for name in config_names]
+        mse_values = np.array(mse_values)
         
-        for i, metric in enumerate(available_metrics):
-            values = [metrics[metric].get(name, 0) for name in experiment_names]
-            ax1.bar(x_pos + i*width, values, width, label=metric.upper(), alpha=0.8)
+        # Sort by performance (lower MSE is better)
+        sorted_indices = np.argsort(mse_values)
+        sorted_names = [config_names[i] for i in sorted_indices]
+        sorted_mse = mse_values[sorted_indices]
         
-        ax1.set_xlabel('Experiment')
-        ax1.set_ylabel('Value')
-        ax1.set_title('Performance Metrics Comparison')
-        ax1.set_xticks(x_pos + width)
-        ax1.set_xticklabels(experiment_names, rotation=45, ha='right')
-        ax1.legend()
+        bars = ax1.bar(range(len(sorted_names)), sorted_mse, alpha=0.7)
+        ax1.set_xlabel('Configuration')
+        ax1.set_ylabel('Mean Squared Error')
+        ax1.set_title('Performance Ranking (MSE)')
+        ax1.set_xticks(range(len(sorted_names)))
+        ax1.set_xticklabels(sorted_names, rotation=45, ha='right')
         ax1.grid(True, alpha=0.3)
+        
+        # Color code bars (green for best, red for worst)
+        for i, bar in enumerate(bars):
+            normalized_performance = i / (len(bars) - 1) if len(bars) > 1 else 0
+            bar.set_color(plt.cm.RdYlGn(1 - normalized_performance))
     else:
-        ax1.text(0.5, 0.5, 'No performance metrics\navailable', ha='center', va='center', 
-                transform=ax1.transAxes)
-        ax1.set_title('Performance Metrics Comparison')
+        ax1.text(0.5, 0.5, 'MSE data not available\nfor comparison', 
+                ha='center', va='center', transform=ax1.transAxes)
+        ax1.set_title('Performance Ranking')
     
-    # 2. Parameter sensitivity analysis
+    # 2. Parameter correlation heatmap
     ax2 = axes[0, 1]
+    param_names = ['spectral_radius', 'n_reservoir', 'noise_level', 'leak_rate']
+    param_data = {}
+    performance_data = []
     
-    if params:
-        # Extract common parameters
-        all_param_keys = set()
-        for param_dict in params.values():
-            all_param_keys.update(param_dict.keys())
+    for param in param_names:
+        values = []
+        for name in config_names:
+            if param in results[name]:
+                values.append(results[name][param])
+            else:
+                values.append(np.nan)
+        param_data[param] = values
+    
+    # Get performance metric (prefer R² if available, otherwise use -MSE)
+    if 'r2' in metrics_available:
+        performance_data = [results[name].get('r2', np.nan) for name in config_names]
+        perf_name = 'R²'
+    elif 'mse' in metrics_available:
+        performance_data = [-results[name].get('mse', np.nan) for name in config_names]
+        perf_name = '-MSE'
+    else:
+        performance_data = [1.0] * n_configs  # Dummy data
+        perf_name = 'Performance'
+    
+    # Calculate correlations
+    if not all(np.isnan(performance_data)):
+        correlations = []
+        param_labels = []
         
-        # Focus on numeric parameters that vary
-        varying_params = []
-        for param_key in all_param_keys:
-            values = []
-            for name in experiment_names:
-                if param_key in params[name] and isinstance(params[name][param_key], (int, float)):
-                    values.append(params[name][param_key])
-            
-            if len(set(values)) > 1 and len(values) == n_experiments:  # Parameter varies
-                varying_params.append(param_key)
+        for param, values in param_data.items():
+            if not all(np.isnan(values)) and len(set(values)) > 1:  # Has variation
+                corr = np.corrcoef(values, performance_data)[0, 1]
+                if not np.isnan(corr):
+                    correlations.append(corr)
+                    param_labels.append(param)
         
-        if varying_params and 'mse' in metrics:
-            # Plot parameter vs performance
-            param_to_plot = varying_params[0]  # Use first varying parameter
-            param_values = [params[name][param_to_plot] for name in experiment_names]
-            mse_values = [metrics['mse'][name] for name in experiment_names]
+        if correlations:
+            # Create correlation matrix visualization
+            corr_matrix = np.array(correlations).reshape(-1, 1)
+            im2 = ax2.imshow(corr_matrix, cmap='RdBu_r', vmin=-1, vmax=1, aspect='auto')
+            ax2.set_yticks(range(len(param_labels)))
+            ax2.set_yticklabels(param_labels)
+            ax2.set_xticks([0])
+            ax2.set_xticklabels([perf_name])
+            ax2.set_title('Parameter-Performance\nCorrelations')
+            plt.colorbar(im2, ax=ax2, shrink=0.8)
             
-            ax2.scatter(param_values, mse_values, s=100, alpha=0.7)
+            # Add correlation values as text
+            for i, corr in enumerate(correlations):
+                ax2.text(0, i, f'{corr:.3f}', ha='center', va='center', 
+                        color='white' if abs(corr) > 0.5 else 'black', fontweight='bold')
+        else:
+            ax2.text(0.5, 0.5, 'Insufficient parameter\nvariation for correlation', 
+                    ha='center', va='center', transform=ax2.transAxes)
+            ax2.set_title('Parameter-Performance\nCorrelations')
+    else:
+        ax2.text(0.5, 0.5, 'Performance data\nnot available', 
+                ha='center', va='center', transform=ax2.transAxes)
+        ax2.set_title('Parameter-Performance\nCorrelations')
+    
+    # 3. Performance distribution comparison (if multiple runs available)
+    ax3 = axes[0, 2]
+    if 'training_scores' in metrics_available:
+        # Box plot of training scores across configurations
+        training_data = []
+        box_labels = []
+        
+        for name in config_names:
+            if 'training_scores' in results[name]:
+                scores = results[name]['training_scores']
+                if isinstance(scores, (list, np.ndarray)) and len(scores) > 1:
+                    training_data.append(scores)
+                    box_labels.append(name)
+        
+        if training_data:
+            ax3.boxplot(training_data, labels=box_labels)
+            ax3.set_xlabel('Configuration')
+            ax3.set_ylabel('Training Score')
+            ax3.set_title('Score Distribution\nComparison')
+            ax3.tick_params(axis='x', rotation=45)
+            ax3.grid(True, alpha=0.3)
+        else:
+            ax3.text(0.5, 0.5, 'No training score\ndistributions available', 
+                    ha='center', va='center', transform=ax3.transAxes)
+            ax3.set_title('Score Distribution\nComparison')
+    else:
+        ax3.text(0.5, 0.5, 'Training scores\nnot available', 
+                ha='center', va='center', transform=ax3.transAxes)
+        ax3.set_title('Score Distribution\nComparison')
+    
+    # 4. Learning curves (if available)
+    ax4 = axes[1, 0]
+    if 'learning_curve' in metrics_available:
+        curves_plotted = 0
+        for name in config_names[:5]:  # Limit to 5 curves for clarity
+            if 'learning_curve' in results[name]:
+                curve = results[name]['learning_curve']
+                if isinstance(curve, (list, np.ndarray)) and len(curve) > 1:
+                    ax4.plot(curve, label=name, linewidth=2, alpha=0.8)
+                    curves_plotted += 1
+        
+        if curves_plotted > 0:
+            ax4.set_xlabel('Training Epoch')
+            ax4.set_ylabel('Performance Metric')
+            ax4.set_title('Learning Curves')
+            ax4.legend()
+            ax4.grid(True, alpha=0.3)
+        else:
+            ax4.text(0.5, 0.5, 'No valid learning\ncurves found', 
+                    ha='center', va='center', transform=ax4.transAxes)
+            ax4.set_title('Learning Curves')
+    else:
+        ax4.text(0.5, 0.5, 'Learning curves\nnot available', 
+                ha='center', va='center', transform=ax4.transAxes)
+        ax4.set_title('Learning Curves')
+    
+    # 5. Statistical significance analysis
+    ax5 = axes[1, 1]
+    if n_configs >= 2 and 'mse' in metrics_available:
+        mse_values = [results[name].get('mse', float('inf')) for name in config_names]
+        
+        # Simple pairwise comparison
+        best_idx = np.argmin(mse_values)
+        best_name = config_names[best_idx]
+        best_mse = mse_values[best_idx]
+        
+        # Calculate relative performance
+        relative_performance = []
+        improvement_labels = []
+        
+        for i, (name, mse) in enumerate(zip(config_names, mse_values)):
+            if i != best_idx and np.isfinite(mse):
+                improvement = (mse - best_mse) / best_mse * 100
+                relative_performance.append(improvement)
+                improvement_labels.append(name)
+        
+        if relative_performance:
+            bars = ax5.barh(range(len(improvement_labels)), relative_performance, alpha=0.7)
+            ax5.set_yticks(range(len(improvement_labels)))
+            ax5.set_yticklabels(improvement_labels)
+            ax5.set_xlabel('% Worse than Best')
+            ax5.set_title(f'Relative to Best\n({best_name})')
+            ax5.axvline(x=0, color='green', linestyle='--', alpha=0.7)
+            ax5.grid(True, alpha=0.3)
             
-            # Add trend line if enough points
-            if len(param_values) > 2:
-                try:
-                    z = np.polyfit(param_values, mse_values, 1)
-                    p = np.poly1d(z)
-                    ax2.plot(sorted(param_values), p(sorted(param_values)), "r--", alpha=0.8)
-                except np.RankWarning:
-                    logger.warning("Could not fit trend line")
-            
-            ax2.set_xlabel(f'{param_to_plot}')
-            ax2.set_ylabel('MSE')
-            ax2.set_title(f'Parameter Sensitivity: {param_to_plot}')
-            ax2.grid(True, alpha=0.3)
+            # Color bars based on performance
+            for bar, perf in zip(bars, relative_performance):
+                if perf < 5:
+                    bar.set_color('lightgreen')
+                elif perf < 20:
+                    bar.set_color('orange')
+                else:
+                    bar.set_color('lightcoral')
+        else:
+            ax5.text(0.5, 0.5, 'Cannot compute\nrelative performance', 
+                    ha='center', va='center', transform=ax5.transAxes)
+            ax5.set_title('Relative Performance')
+    else:
+        ax5.text(0.5, 0.5, 'Insufficient data for\nstatistical comparison', 
+                ha='center', va='center', transform=ax5.transAxes)
+        ax5.set_title('Statistical Significance')
+    
+    # 6. Parameter space visualization
+    ax6 = axes[1, 2]
+    if 'spectral_radius' in param_data and not all(np.isnan(param_data['spectral_radius'])):
+        x_values = param_data['spectral_radius']
+        y_values = performance_data
+        
+        # Create scatter plot
+        valid_mask = ~(np.isnan(x_values) | np.isnan(y_values))
+        if np.sum(valid_mask) > 1:
+            scatter = ax6.scatter(np.array(x_values)[valid_mask], 
+                                np.array(y_values)[valid_mask], 
+                                alpha=0.7, s=60)
             
             # Add labels for each point
-            for name, x, y in zip(experiment_names, param_values, mse_values):
-                ax2.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points', 
-                           fontsize=8, alpha=0.8)
+            for i, name in enumerate(config_names):
+                if valid_mask[i]:
+                    ax6.annotate(name, (x_values[i], y_values[i]), 
+                               xytext=(5, 5), textcoords='offset points', 
+                               fontsize=8, alpha=0.8)
+            
+            ax6.set_xlabel('Spectral Radius')
+            ax6.set_ylabel(perf_name)
+            ax6.set_title('Parameter Space\n(Spectral Radius vs Performance)')
+            ax6.grid(True, alpha=0.3)
         else:
-            ax2.text(0.5, 0.5, 'No varying parameters\nfor sensitivity analysis', 
-                    ha='center', va='center', transform=ax2.transAxes)
-            ax2.set_title('Parameter Sensitivity Analysis')
+            ax6.text(0.5, 0.5, 'Insufficient valid data\nfor scatter plot', 
+                    ha='center', va='center', transform=ax6.transAxes)
+            ax6.set_title('Parameter Space')
     else:
-        ax2.text(0.5, 0.5, 'No parameter data\navailable', ha='center', va='center', 
-                transform=ax2.transAxes)
-        ax2.set_title('Parameter Sensitivity Analysis')
-    
-    # 3. Ranking and scoring
-    ax3 = axes[0, 2]
-    
-    if 'mse' in metrics and 'r2' in metrics:
-        # Create composite score (lower MSE is better, higher R² is better)
-        mse_values = np.array([metrics['mse'][name] for name in experiment_names])
-        r2_values = np.array([metrics['r2'][name] for name in experiment_names])
-        
-        # Normalize metrics (0-1 scale)
-        mse_norm = 1 - (mse_values - mse_values.min()) / (mse_values.max() - mse_values.min() + 1e-8)
-        r2_norm = (r2_values - r2_values.min()) / (r2_values.max() - r2_values.min() + 1e-8)
-        
-        # Composite score (equal weight)
-        composite_scores = 0.5 * mse_norm + 0.5 * r2_norm
-        
-        # Sort by composite score
-        sorted_indices = np.argsort(composite_scores)[::-1]
-        sorted_names = [experiment_names[i] for i in sorted_indices]
-        sorted_scores = composite_scores[sorted_indices]
-        
-        # Horizontal bar chart
-        y_pos = np.arange(len(sorted_names))
-        bars = ax3.barh(y_pos, sorted_scores, alpha=0.8)
-        
-        # Color bars by rank
-        colors = plt.cm.RdYlGn(sorted_scores)
-        for bar, color in zip(bars, colors):
-            bar.set_color(color)
-        
-        ax3.set_yticks(y_pos)
-        ax3.set_yticklabels(sorted_names)
-        ax3.set_xlabel('Composite Score')
-        ax3.set_title('Overall Ranking')
-        ax3.grid(True, alpha=0.3)
-    else:
-        ax3.text(0.5, 0.5, 'Insufficient metrics\nfor ranking', ha='center', va='center', 
-                transform=ax3.transAxes)
-        ax3.set_title('Overall Ranking')
-    
-    # 4. Training efficiency comparison
-    ax4 = axes[1, 0]
-    
-    if 'training_time' in metrics and 'mse' in metrics:
-        training_times = [metrics['training_time'][name] for name in experiment_names]
-        mse_values = [metrics['mse'].get(name, 0) for name in experiment_names]
-        
-        # Efficiency: lower time and lower error is better
-        ax4.scatter(training_times, mse_values, s=100, alpha=0.7)
-        
-        ax4.set_xlabel('Training Time')
-        ax4.set_ylabel('MSE')
-        ax4.set_title('Training Efficiency')
-        ax4.grid(True, alpha=0.3)
-        
-        # Add labels
-        for name, x, y in zip(experiment_names, training_times, mse_values):
-            ax4.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points', 
-                       fontsize=8, alpha=0.8)
-    else:
-        ax4.text(0.5, 0.5, 'No training time\ndata available', ha='center', va='center', 
-                transform=ax4.transAxes)
-        ax4.set_title('Training Efficiency')
-    
-    # 5. Stability analysis
-    ax5 = axes[1, 1]
-    
-    if 'spectral_radius' in metrics and 'mse' in metrics:
-        spectral_radii = [metrics['spectral_radius'][name] for name in experiment_names]
-        performance_values = [metrics['mse'][name] for name in experiment_names]
-        
-        ax5.scatter(spectral_radii, performance_values, s=100, alpha=0.7)
-        
-        # Add stability boundary
-        ax5.axvline(x=1.0, color='red', linestyle='--', alpha=0.7, label='Stability Boundary')
-        
-        ax5.set_xlabel('Spectral Radius')
-        ax5.set_ylabel('MSE')
-        ax5.set_title('Stability vs Performance')
-        ax5.legend()
-        ax5.grid(True, alpha=0.3)
-        
-        # Add labels
-        for name, x, y in zip(experiment_names, spectral_radii, performance_values):
-            ax5.annotate(name, (x, y), xytext=(5, 5), textcoords='offset points', 
-                       fontsize=8, alpha=0.8)
-    else:
-        ax5.text(0.5, 0.5, 'No spectral radius\ndata available', ha='center', va='center', 
-                transform=ax5.transAxes)
-        ax5.set_title('Stability vs Performance')
-    
-    # 6. Memory capacity comparison
-    ax6 = axes[1, 2]
-    
-    if 'memory_capacity' in metrics:
-        memory_capacities = [metrics['memory_capacity'][name] for name in experiment_names]
-        
-        ax6.bar(range(n_experiments), memory_capacities, alpha=0.8)
-        ax6.set_xticks(range(n_experiments))
-        ax6.set_xticklabels(experiment_names, rotation=45, ha='right')
-        ax6.set_ylabel('Memory Capacity')
-        ax6.set_title('Memory Capacity Comparison')
-        ax6.grid(True, alpha=0.3)
-    else:
-        ax6.text(0.5, 0.5, 'No memory capacity\ndata available', 
+        ax6.text(0.5, 0.5, 'Spectral radius data\nnot available', 
                 ha='center', va='center', transform=ax6.transAxes)
-        ax6.set_title('Memory Capacity Comparison')
+        ax6.set_title('Parameter Space')
     
     plt.tight_layout()
     
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+    
     plt.show()
     
     # Print comparative summary
     print_comparative_summary(results)
 
 
-# ================================
-# ADVANCED SPECTRAL VISUALIZATION
-# ================================
-
 def visualize_spectral_analysis(reservoir_weights: np.ndarray,
-                               figsize: Tuple[int, int] = (15, 10), 
+                               detailed: bool = True,
+                               figsize: Tuple[int, int] = (16, 12),
                                save_path: Optional[str] = None) -> None:
     """
-    Advanced spectral analysis of reservoir properties.
+    Advanced spectral analysis of reservoir weight matrix.
     
     🔬 **Research Background:**
-    Spectral analysis methods based on linear algebra, dynamical systems theory,
-    and numerical analysis applied to reservoir computing matrices.
+    Comprehensive spectral analysis based on matrix theory, dynamical systems,
+    and stability analysis for reservoir computing systems.
     
     **Key Visualizations:**
-    1. **Eigenvalue Spectrum**: Complex plane analysis with stability annotations
-    2. **Eigenvalue Magnitude Decay**: Logarithmic decay of eigenvalue magnitudes
-    3. **Dominant Eigenmodes**: Visualization of principal eigenvectors
-    4. **Spectral Gap Analysis**: Identification of eigenvalue clustering
-    5. **Singular Value Spectrum**: Numerical conditioning and stability analysis
-    6. **Effective Dimensionality**: Rank analysis across different thresholds
+    1. **Eigenvalue Spectrum**: Complex plane with stability regions
+    2. **Singular Value Decomposition**: SVD spectrum and effective rank
+    3. **Condition Number Analysis**: Numerical stability assessment
+    4. **Spectral Density**: Distribution of eigenvalue magnitudes
+    5. **Phase Distribution**: Angular distribution in complex plane
+    6. **Stability Margins**: Echo State Property analysis
     
     Args:
         reservoir_weights: Reservoir weight matrix
+        detailed: Whether to include detailed spectral analysis
         figsize: Figure size for the visualization
         save_path: Optional path to save the visualization
-        
-    References:
-        - Jaeger, H. (2001). "The 'echo state' approach to analysing and training RNNs"
-        - Yildiz, I.B., et al. (2012). "Re-visiting the echo state property"
     """
     fig, axes = plt.subplots(2, 3, figsize=figsize)
-    fig.suptitle('Advanced Spectral Analysis of Reservoir', fontsize=16, fontweight='bold')
+    fig.suptitle('Advanced Spectral Analysis of Reservoir Matrix', fontsize=16, fontweight='bold')
     
-    # Compute eigenvalues and eigenvectors
-    try:
-        eigenvals, eigenvecs = np.linalg.eig(reservoir_weights)
-        eigenvals_sorted_idx = np.argsort(np.abs(eigenvals))[::-1]
-        eigenvals_sorted = eigenvals[eigenvals_sorted_idx]
-        eigenvecs_sorted = eigenvecs[:, eigenvals_sorted_idx]
-    except np.linalg.LinAlgError as e:
-        logger.error(f"Eigenvalue decomposition failed: {e}")
-        fig.text(0.5, 0.5, 'Eigenvalue decomposition failed', ha='center', va='center', fontsize=14)
-        plt.show()
-        return
+    # Compute eigenvalues and singular values
+    eigenvals = np.linalg.eigvals(reservoir_weights)
+    singular_vals = np.linalg.svd(reservoir_weights, compute_uv=False)
+    spectral_radius = np.max(np.abs(eigenvals))
+    condition_number = np.max(singular_vals) / (np.min(singular_vals) + 1e-12)
     
-    # 1. Eigenvalue spectrum with detailed analysis
+    # 1. Enhanced eigenvalue spectrum
     ax1 = axes[0, 0]
+    scatter = ax1.scatter(eigenvals.real, eigenvals.imag, 
+                         c=np.abs(eigenvals), cmap='viridis', s=40, alpha=0.7)
     
-    magnitudes = np.abs(eigenvals_sorted)
+    # Multiple stability circles
+    circles = [
+        plt.Circle((0, 0), 1, fill=False, color='red', linestyle='--', linewidth=2, label='Unit Circle'),
+        plt.Circle((0, 0), 0.95, fill=False, color='orange', linestyle=':', linewidth=1, alpha=0.7, label='Conservative'),
+        plt.Circle((0, 0), spectral_radius, fill=False, color='blue', linestyle='-', linewidth=1, alpha=0.5, label=f'Spectral Radius ({spectral_radius:.3f})')
+    ]
     
-    scatter = ax1.scatter(eigenvals_sorted.real, eigenvals_sorted.imag, 
-                        c=magnitudes, cmap='viridis', s=50, alpha=0.8)
+    for circle in circles:
+        ax1.add_patch(circle)
     
-    # Unit circle
-    circle = plt.Circle((0, 0), 1, fill=False, color='red', linestyle='--', linewidth=2)
-    ax1.add_patch(circle)
-    
-    # Spectral radius
-    max_eigenval = np.max(magnitudes)
-    spectral_circle = plt.Circle((0, 0), max_eigenval, fill=False, color='orange', 
-                               linestyle=':', linewidth=2, alpha=0.7)
-    ax1.add_patch(spectral_circle)
-    
+    ax1.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+    ax1.axvline(x=0, color='k', linestyle='-', alpha=0.3)
     ax1.set_xlabel('Real Part')
     ax1.set_ylabel('Imaginary Part')
-    ax1.set_title(f'Eigenvalue Spectrum\nSpectral Radius: {max_eigenval:.4f}')
+    ax1.set_title('Eigenvalue Spectrum')
     ax1.axis('equal')
+    ax1.legend(loc='upper right', fontsize=8)
     ax1.grid(True, alpha=0.3)
     plt.colorbar(scatter, ax=ax1, shrink=0.8, label='|λ|')
     
-    # 2. Eigenvalue magnitude distribution
+    # 2. Singular value spectrum
     ax2 = axes[0, 1]
-    
-    ax2.plot(range(1, len(magnitudes) + 1), magnitudes, 'bo-', markersize=4, linewidth=1)
-    ax2.axhline(y=1, color='red', linestyle='--', alpha=0.7, label='Stability threshold')
-    ax2.set_xlabel('Eigenvalue Index (sorted)')
-    ax2.set_ylabel('|λ|')
-    ax2.set_title('Eigenvalue Magnitude Decay')
-    ax2.set_yscale('log')
-    ax2.legend()
+    ax2.semilogy(range(1, len(singular_vals) + 1), singular_vals, 'bo-', linewidth=2, markersize=4)
+    ax2.set_xlabel('Singular Value Index')
+    ax2.set_ylabel('Singular Value (log scale)')
+    ax2.set_title('Singular Value Spectrum')
     ax2.grid(True, alpha=0.3)
     
-    # 3. Eigenvector analysis - dominant modes
+    # Add effective rank estimation
+    cumulative_variance = np.cumsum(singular_vals**2) / np.sum(singular_vals**2)
+    effective_rank = np.argmax(cumulative_variance > 0.95) + 1
+    ax2.axvline(x=effective_rank, color='red', linestyle='--', 
+               label=f'Effective Rank ({effective_rank})')
+    ax2.legend()
+    
+    # 3. Condition number and stability analysis
     ax3 = axes[0, 2]
     
-    # Show first few dominant eigenvectors
-    n_modes = min(5, reservoir_weights.shape[0])
-    for i in range(n_modes):
-        eigenvec = eigenvecs_sorted[:, i].real
-        ax3.plot(eigenvec, alpha=0.7, linewidth=2, 
-                label=f'Mode {i+1} (λ={magnitudes[i]:.3f})')
+    # Create stability assessment visualization
+    stability_metrics = {
+        'Spectral Radius': spectral_radius,
+        'Condition Number': condition_number,
+        'Max |Re(λ)|': np.max(np.abs(eigenvals.real)),
+        'Max |Im(λ)|': np.max(np.abs(eigenvals.imag))
+    }
     
-    ax3.set_xlabel('Neuron Index')
-    ax3.set_ylabel('Eigenvector Component')
-    ax3.set_title(f'Dominant Eigenmodes (Top {n_modes})')
-    ax3.legend()
+    # Normalize metrics for comparison
+    normalized_metrics = {}
+    for name, value in stability_metrics.items():
+        if name == 'Spectral Radius':
+            normalized_metrics[name] = min(value, 2.0) / 2.0  # Cap at 2.0
+        elif name == 'Condition Number':
+            normalized_metrics[name] = min(np.log10(value + 1), 6) / 6  # Log scale, cap at 10^6
+        else:
+            normalized_metrics[name] = min(value, 2.0) / 2.0
+    
+    metrics_names = list(normalized_metrics.keys())
+    metrics_values = list(normalized_metrics.values())
+    
+    bars = ax3.bar(range(len(metrics_names)), metrics_values, alpha=0.7)
+    ax3.set_xticks(range(len(metrics_names)))
+    ax3.set_xticklabels(metrics_names, rotation=45, ha='right')
+    ax3.set_ylabel('Normalized Value')
+    ax3.set_title('Stability Metrics\n(Normalized)')
+    
+    # Color code bars based on stability
+    for i, (bar, value) in enumerate(zip(bars, metrics_values)):
+        if value < 0.5:
+            bar.set_color('lightgreen')
+        elif value < 0.8:
+            bar.set_color('orange') 
+        else:
+            bar.set_color('lightcoral')
+    
+    ax3.axhline(y=0.5, color='orange', linestyle='--', alpha=0.7, label='Caution Threshold')
+    ax3.axhline(y=0.8, color='red', linestyle='--', alpha=0.7, label='Warning Threshold')
+    ax3.legend(fontsize=8)
     ax3.grid(True, alpha=0.3)
     
-    # 4. Spectral gap analysis
+    # 4. Spectral density
     ax4 = axes[1, 0]
+    eigenval_magnitudes = np.abs(eigenvals)
     
-    # Calculate gaps between consecutive eigenvalues
-    if len(magnitudes) > 1:
-        spectral_gaps = np.diff(magnitudes)
-        ax4.plot(range(1, len(spectral_gaps) + 1), -spectral_gaps, 'ro-', markersize=4)
-        ax4.set_xlabel('Gap Index')
-        ax4.set_ylabel('Spectral Gap')
-        ax4.set_title('Spectral Gap Analysis')
+    if len(eigenval_magnitudes) > 1:
+        ax4.hist(eigenval_magnitudes, bins=20, alpha=0.7, density=True, edgecolor='black')
+        ax4.axvline(x=1.0, color='red', linestyle='--', linewidth=2, label='Stability Boundary')
+        ax4.axvline(x=spectral_radius, color='blue', linestyle='-', linewidth=2, 
+                   label=f'Spectral Radius ({spectral_radius:.3f})')
+        ax4.set_xlabel('|λ|')
+        ax4.set_ylabel('Density')
+        ax4.set_title('Eigenvalue Magnitude\nDistribution')
+        ax4.legend()
         ax4.grid(True, alpha=0.3)
-        
-        # Highlight largest gaps
-        if len(spectral_gaps) > 0:
-            largest_gaps_idx = np.argsort(-spectral_gaps)[:3]
-            for idx in largest_gaps_idx[:min(3, len(largest_gaps_idx))]:
-                ax4.annotate(f'Gap {idx+1}', (idx+1, -spectral_gaps[idx]), 
-                           xytext=(5, 5), textcoords='offset points', fontsize=8)
     else:
-        ax4.text(0.5, 0.5, 'Insufficient eigenvalues\nfor gap analysis', 
-                ha='center', va='center', transform=ax4.transAxes)
-        ax4.set_title('Spectral Gap Analysis')
+        ax4.text(0.5, 0.5, 'Single eigenvalue', ha='center', va='center', 
+                transform=ax4.transAxes)
+        ax4.set_title('Eigenvalue Magnitude\nDistribution')
     
-    # 5. Condition number and numerical stability
+    # 5. Phase distribution
     ax5 = axes[1, 1]
+    phases = np.angle(eigenvals)
     
-    # Condition number analysis
-    try:
-        condition_number = np.linalg.cond(reservoir_weights)
-        
-        # SVD for more detailed analysis
-        U, s, Vh = np.linalg.svd(reservoir_weights)
-        
-        ax5.semilogy(range(1, len(s) + 1), s, 'bo-', markersize=4)
-        ax5.set_xlabel('Singular Value Index')
-        ax5.set_ylabel('Singular Value')
-        ax5.set_title(f'Singular Value Spectrum\nCondition Number: {condition_number:.2e}')
-        ax5.grid(True, alpha=0.3)
-        
-        # Add condition number category
-        if condition_number < 1e12:
-            stability_text = "Well-conditioned"
-            color = 'green'
-        elif condition_number < 1e15:
-            stability_text = "Moderately conditioned"
-            color = 'orange'
-        else:
-            stability_text = "Ill-conditioned"
-            color = 'red'
-        
-        ax5.text(0.02, 0.98, stability_text, transform=ax5.transAxes,
-                bbox=dict(boxstyle="round,pad=0.3", facecolor=color, alpha=0.3),
-                verticalalignment='top')
-    except Exception as e:
-        logger.warning(f"SVD computation failed: {e}")
-        ax5.text(0.5, 0.5, 'SVD computation\nfailed', ha='center', va='center', 
-                transform=ax5.transAxes)
-        ax5.set_title('Singular Value Spectrum')
-        condition_number = np.nan
-        s = np.array([])
+    # Polar histogram
+    ax5 = plt.subplot(2, 3, 5, projection='polar')
+    n, bins, patches = ax5.hist(phases, bins=16, alpha=0.7)
+    ax5.set_title('Eigenvalue Phase\nDistribution', pad=20)
+    ax5.set_theta_zero_location('E')
     
-    # 6. Effective rank and dimensionality
+    # Color code by frequency
+    for patch, height in zip(patches, n):
+        normalized_height = height / max(n) if max(n) > 0 else 0
+        patch.set_facecolor(plt.cm.viridis(normalized_height))
+    
+    # 6. Detailed spectral properties (if requested)
     ax6 = axes[1, 2]
     
-    if len(s) > 0:
-        # Effective rank using different thresholds
-        thresholds = np.logspace(-8, 0, 50)
-        effective_ranks = []
+    if detailed:
+        # Create a summary table of spectral properties
+        properties = {
+            'Spectral Radius': f'{spectral_radius:.6f}',
+            'Condition Number': f'{condition_number:.2e}',
+            'Matrix Rank': f'{np.linalg.matrix_rank(reservoir_weights)}',
+            'Determinant': f'{np.linalg.det(reservoir_weights):.2e}',
+            'Trace': f'{np.trace(reservoir_weights):.6f}',
+            'Frobenius Norm': f'{np.linalg.norm(reservoir_weights, "fro"):.6f}',
+            'Complex Eigenvals': f'{np.sum(np.abs(eigenvals.imag) > 1e-10)}',
+            'ESP Status': 'Satisfied' if spectral_radius < 1.0 else 'Violated'
+        }
         
-        for threshold in thresholds:
-            effective_rank = np.sum(s / s[0] > threshold) if s[0] > 0 else 0
-            effective_ranks.append(effective_rank)
+        # Create text table
+        table_text = []
+        for prop, value in properties.items():
+            table_text.append(f'{prop}: {value}')
         
-        ax6.semilogx(thresholds, effective_ranks, 'b-', linewidth=2)
-        ax6.axhline(y=reservoir_weights.shape[0], color='red', linestyle='--', 
-                   alpha=0.7, label='Full rank')
-        ax6.set_xlabel('Relative Threshold')
-        ax6.set_ylabel('Effective Rank')
-        ax6.set_title('Effective Dimensionality')
-        ax6.legend()
-        ax6.grid(True, alpha=0.3)
-        
-        # Add specific thresholds
-        for thresh, name in [(1e-6, '1e-6'), (1e-3, '1e-3'), (1e-1, '1e-1')]:
-            eff_rank = np.sum(s / s[0] > thresh) if s[0] > 0 else 0
-            ax6.axvline(x=thresh, color='gray', linestyle=':', alpha=0.5)
-            ax6.text(thresh, eff_rank, f'{eff_rank}', rotation=90, 
-                    verticalalignment='bottom', fontsize=8)
+        ax6.text(0.05, 0.95, '\n'.join(table_text), 
+                transform=ax6.transAxes, fontsize=10, fontfamily='monospace',
+                verticalalignment='top',
+                bbox=dict(boxstyle="round,pad=0.5", facecolor='lightblue', alpha=0.3))
+        ax6.set_title('Spectral Properties\nSummary')
+        ax6.axis('off')
     else:
-        ax6.text(0.5, 0.5, 'No singular values\navailable', ha='center', va='center', 
-                transform=ax6.transAxes)
-        ax6.set_title('Effective Dimensionality')
+        ax6.text(0.5, 0.5, 'Set detailed=True\nfor spectral properties', 
+                ha='center', va='center', transform=ax6.transAxes)
+        ax6.set_title('Spectral Properties\nSummary')
+        ax6.axis('off')
     
     plt.tight_layout()
     
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        
+    
     plt.show()
     
-    # Print spectral analysis summary
-    print_spectral_statistics(eigenvals_sorted, s, condition_number)
+    # Print detailed spectral statistics
+    print_spectral_statistics(eigenvals, singular_vals, condition_number)
 
-
-# ================================
-# ANIMATION UTILITIES
-# ================================
 
 def create_reservoir_animation(states: np.ndarray, 
-                              figsize: Tuple[int, int] = (10, 8),
-                              interval: int = 100, 
-                              save_path: Optional[str] = None) -> FuncAnimation:
+                              fps: int = 10,
+                              save_path: Optional[str] = None,
+                              **kwargs) -> Optional[FuncAnimation]:
     """
-    Create animated visualization of reservoir state evolution.
+    Create animation of reservoir state evolution over time.
+    
+    🎬 **Animation Features:**
+    - Real-time visualization of neural activity patterns
+    - Color-coded activation levels with smooth transitions
+    - Time progress indicator and statistics overlay
+    - Export capabilities for presentations and publications
     
     Args:
-        states: Reservoir states over time (time_steps × n_reservoir)
-        figsize: Figure size for animation
-        interval: Animation interval in milliseconds
-        save_path: Path to save animation (as gif or mp4)
+        states: Reservoir state matrix (time_steps × n_reservoir)
+        fps: Frames per second for animation
+        save_path: Optional path to save animation (supports .mp4, .gif)
+        **kwargs: Additional animation parameters
         
     Returns:
-        FuncAnimation object
+        FuncAnimation object if successful, None otherwise
     """
-    # Sample neurons if too many
-    max_neurons = 50
-    if states.shape[1] > max_neurons:
-        neuron_indices = np.random.choice(states.shape[1], max_neurons, replace=False)
+    if states.shape[0] < 10:
+        print("⚠️ Insufficient time steps for meaningful animation (need ≥10)")
+        return None
+    
+    # Setup figure and animation
+    fig, (ax_main, ax_stats) = plt.subplots(1, 2, figsize=(15, 6))
+    fig.suptitle('Reservoir State Evolution Animation', fontsize=14, fontweight='bold')
+    
+    # Determine display parameters
+    max_neurons_display = 100
+    if states.shape[1] > max_neurons_display:
+        neuron_indices = np.random.choice(states.shape[1], max_neurons_display, replace=False)
         display_states = states[:, neuron_indices]
-        title_suffix = f" ({max_neurons} sampled neurons)"
+        title_suffix = f" (Random {max_neurons_display} neurons)"
     else:
         display_states = states
         title_suffix = ""
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
-    fig.suptitle(f'Reservoir State Evolution Animation{title_suffix}', fontsize=14)
-    
     # Initialize plots
-    im1 = ax1.imshow(display_states[0].reshape(-1, 1), cmap='viridis', 
-                    vmin=display_states.min(), vmax=display_states.max(),
-                    aspect='auto')
-    ax1.set_title('Current State')
-    ax1.set_xlabel('State Value')
-    ax1.set_ylabel('Neuron Index')
+    im = ax_main.imshow(display_states[0].reshape(-1, 1).T if display_states[0].ndim == 1 else display_states[0:1], 
+                       cmap='viridis', aspect='auto', vmin=display_states.min(), vmax=display_states.max())
+    ax_main.set_title(f'Neural Activity{title_suffix}')
+    ax_main.set_xlabel('Neuron Index')
+    ax_main.set_ylabel('Activity Level')
     
-    # State trajectory plot
-    ax2.set_xlim(0, len(display_states))
-    ax2.set_ylim(display_states.min(), display_states.max())
-    ax2.set_title('State Trajectories Over Time')
-    ax2.set_xlabel('Time Step')
-    ax2.set_ylabel('Activation')
+    cbar = plt.colorbar(im, ax=ax_main, shrink=0.8)
+    cbar.set_label('Activation')
     
-    # Initialize trajectory lines
-    n_trajectories = min(10, display_states.shape[1])
-    trajectory_indices = np.linspace(0, display_states.shape[1]-1, n_trajectories).astype(int)
-    lines = []
-    for i in trajectory_indices:
-        line, = ax2.plot([], [], alpha=0.7, linewidth=1)
-        lines.append(line)
+    # Statistics subplot
+    time_line, = ax_stats.plot([], [], 'b-', linewidth=2, label='Mean Activity')
+    variance_line, = ax_stats.plot([], [], 'r--', linewidth=2, label='Activity Variance')
+    ax_stats.set_xlim(0, states.shape[0])
+    ax_stats.set_ylim(min(np.mean(states, axis=1).min(), np.var(states, axis=1).min()), 
+                      max(np.mean(states, axis=1).max(), np.var(states, axis=1).max()))
+    ax_stats.set_xlabel('Time Step')
+    ax_stats.set_ylabel('Statistics')
+    ax_stats.set_title('Real-time Statistics')
+    ax_stats.legend()
+    ax_stats.grid(True, alpha=0.3)
     
-    # Time text
-    time_text = ax1.text(0.02, 0.98, '', transform=ax1.transAxes, 
-                       bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
-                       verticalalignment='top')
+    # Animation data
+    mean_activities = []
+    variance_activities = []
     
     def animate(frame):
-        # Update state visualization
-        im1.set_array(display_states[frame].reshape(-1, 1))
+        # Update main heatmap
+        current_state = display_states[frame]
+        im.set_array(current_state.reshape(1, -1))
+        ax_main.set_title(f'Neural Activity at t={frame}{title_suffix}')
         
-        # Update trajectories
-        for i, line in enumerate(lines):
-            neuron_idx = trajectory_indices[i]
-            line.set_data(range(frame+1), display_states[:frame+1, neuron_idx])
+        # Update statistics
+        mean_act = np.mean(states[frame])
+        var_act = np.var(states[frame])
+        mean_activities.append(mean_act)
+        variance_activities.append(var_act)
         
-        # Update time
-        time_text.set_text(f'Time: {frame}')
+        time_line.set_data(range(len(mean_activities)), mean_activities)
+        variance_line.set_data(range(len(variance_activities)), variance_activities)
         
-        return [im1] + lines + [time_text]
+        # Progress indicator
+        progress = frame / (states.shape[0] - 1) * 100
+        fig.suptitle(f'Reservoir State Evolution Animation (Progress: {progress:.1f}%)', 
+                    fontsize=14, fontweight='bold')
+        
+        return [im, time_line, variance_line]
     
     # Create animation
-    anim = FuncAnimation(fig, animate, frames=len(display_states), 
-                       interval=interval, blit=False, repeat=True)
+    anim = FuncAnimation(fig, animate, frames=states.shape[0], 
+                        interval=1000//fps, blit=False, repeat=True)
     
+    # Save if requested
     if save_path:
         try:
             if save_path.endswith('.gif'):
-                anim.save(save_path, writer='pillow', fps=10)
+                anim.save(save_path, writer='pillow', fps=fps)
             elif save_path.endswith('.mp4'):
-                anim.save(save_path, writer='ffmpeg', fps=10)
-            else:
-                warnings.warn("Animation save format not recognized. Use .gif or .mp4")
+                anim.save(save_path, writer='ffmpeg', fps=fps, bitrate=1800)
+            print(f"✅ Animation saved to: {save_path}")
         except Exception as e:
             logger.error(f"Failed to save animation: {e}")
+            print(f"⚠️ Could not save animation: {e}")
     
+    plt.tight_layout()
     plt.show()
+    
     return anim
 
 
-# ================================
-# STATISTICS PRINTING UTILITIES
-# ================================
-
-def print_reservoir_statistics(reservoir_weights: np.ndarray, 
-                              eigenvals: np.ndarray, 
-                              degrees: np.ndarray, 
-                              weights: np.ndarray,
-                              sparsity: float) -> None:
-    """Print comprehensive reservoir statistics."""
-    n_reservoir = reservoir_weights.shape[0]
-    
-    print(f"\n📊 Enhanced Reservoir Statistics:")
-    print(f"=" * 50)
-    
-    # Basic properties
-    print(f"🏗️  Architecture:")
-    print(f"   • Size: {n_reservoir} neurons")
-    print(f"   • Connections: {np.sum(reservoir_weights != 0):,} ({sparsity:.1%} target sparsity)")
-    print(f"   • Actual density: {np.mean(reservoir_weights != 0):.1%}")
-    
-    # Spectral properties
-    spectral_radius = np.max(np.abs(eigenvals))
-    print(f"\n🌊 Spectral Properties:")
-    print(f"   • Spectral radius: {spectral_radius:.4f}")
-    print(f"   • Echo state property: {'✓ Satisfied' if spectral_radius < 1 else '⚠ Violated'}")
-    print(f"   • Complex eigenvalues: {np.sum(np.abs(eigenvals.imag) > 1e-10)}")
-    print(f"   • Eigenvalue spread: {np.max(np.abs(eigenvals)) - np.min(np.abs(eigenvals)):.4f}")
-    
-    # Connectivity statistics
-    if len(degrees) > 0:
-        print(f"\n🔗 Connectivity:")
-        print(f"   • Mean degree: {degrees.mean():.1f} ± {degrees.std():.1f}")
-        print(f"   • Degree range: [{degrees.min()}, {degrees.max()}]")
-        if degrees.mean() > 0:
-            print(f"   • Degree coefficient of variation: {degrees.std() / degrees.mean():.3f}")
-    
-    # Weight statistics
-    if len(weights) > 0:
-        print(f"\n⚖️  Weight Distribution:")
-        print(f"   • Weight range: [{weights.min():.4f}, {weights.max():.4f}]")
-        print(f"   • Mean |weight|: {np.mean(np.abs(weights)):.4f}")
-        print(f"   • Weight std: {weights.std():.4f}")
-        print(f"   • Skewness: {stats.skew(weights):.3f}")
-        print(f"   • Kurtosis: {stats.kurtosis(weights):.3f}")
-    
-    # Numerical properties
-    condition_number = np.linalg.cond(reservoir_weights)
-    print(f"\n🔢 Numerical Properties:")
-    print(f"   • Condition number: {condition_number:.2e}")
-    print(f"   • Numerical stability: {assess_condition_number(condition_number)}")
-    
-    print("=" * 50)
-
-
-def print_dynamics_statistics(states: np.ndarray, 
-                             inputs: Optional[np.ndarray], 
-                             outputs: Optional[np.ndarray]) -> None:
-    """Print dynamics analysis statistics."""
-    print(f"\n🌊 Reservoir Dynamics Statistics:")
-    print(f"=" * 50)
-    
-    # Basic dynamics
-    print(f"📈 Activity Patterns:")
-    print(f"   • Time steps: {states.shape[0]:,}")
-    print(f"   • Active neurons: {np.sum(np.std(states, axis=0) > 1e-6)}/{states.shape[1]}")
-    print(f"   • Mean activity: {np.mean(states):.4f} ± {np.std(states):.4f}")
-    print(f"   • Activity range: [{states.min():.4f}, {states.max():.4f}]")
-    
-    # Temporal properties
-    print(f"\n⏱️  Temporal Properties:")
-    if states.shape[0] > 1:
-        # Simple measure of temporal correlation
-        try:
-            temporal_corr = np.mean([np.corrcoef(states[:-1, i], states[1:, i])[0, 1] 
-                                   for i in range(min(10, states.shape[1]))])
-            print(f"   • Mean temporal correlation: {temporal_corr:.4f}")
-        except:
-            print(f"   • Temporal correlation: calculation failed")
-        
-        # Activity diversity
-        try:
-            pairwise_corr = np.corrcoef(states.T)
-            mean_corr = np.mean(pairwise_corr[np.triu_indices_from(pairwise_corr, k=1)])
-            print(f"   • Mean pairwise correlation: {mean_corr:.4f}")
-        except:
-            print(f"   • Pairwise correlation: calculation failed")
-    
-    print("=" * 50)
-
-
-def print_performance_statistics(predictions: np.ndarray, 
-                                targets: np.ndarray, 
-                                errors: np.ndarray) -> None:
-    """Print comprehensive performance statistics."""
-    print(f"\n🎯 Performance Analysis:")
-    print(f"=" * 50)
-    
-    # Basic metrics
-    mse = np.mean(errors**2)
-    mae = np.mean(np.abs(errors))
-    rmse = np.sqrt(mse)
-    
-    # R² calculation
-    ss_res = np.sum(errors**2)
-    ss_tot = np.sum((targets - np.mean(targets))**2)
-    r2 = 1 - (ss_res / (ss_tot + 1e-8))
-    
-    print(f"📊 Error Metrics:")
-    print(f"   • MSE: {mse:.6f}")
-    print(f"   • RMSE: {rmse:.6f}")
-    print(f"   • MAE: {mae:.6f}")
-    print(f"   • R²: {r2:.4f}")
-    
-    # Relative metrics
-    target_range = np.max(targets) - np.min(targets)
-    relative_error = rmse / (target_range + 1e-8)
-    print(f"   • Relative RMSE: {relative_error:.1%}")
-    
-    # Error distribution
-    print(f"\n📈 Error Distribution:")
-    print(f"   • Error std: {np.std(errors):.6f}")
-    print(f"   • Error skewness: {stats.skew(errors.flatten()):.3f}")
-    print(f"   • Error kurtosis: {stats.kurtosis(errors.flatten()):.3f}")
-    
-    # Prediction quality
-    pred_target_corr = np.corrcoef(predictions.flatten(), targets.flatten())[0, 1]
-    print(f"\n🔍 Prediction Quality:")
-    print(f"   • Prediction-target correlation: {pred_target_corr:.4f}")
-    
-    # Accuracy brackets
-    tolerance_levels = [0.01, 0.05, 0.1]
-    for tol in tolerance_levels:
-        accuracy = np.mean(np.abs(errors) <= tol * np.std(targets))
-        print(f"   • Accuracy within {tol*100:.0f}% std: {accuracy:.1%}")
-    
-    print("=" * 50)
-
-
 def print_comparative_summary(results: Dict[str, Dict[str, Any]]) -> None:
-    """Print comparative analysis summary."""
-    print(f"\n🏆 Comparative Analysis Summary:")
-    print(f"=" * 60)
+    """
+    Print comprehensive comparative summary of multiple configurations
     
-    experiment_names = list(results.keys())
+    Args:
+        results: Dictionary with configuration results
+    """
+    print("\n" + "="*70)
+    print("📊 COMPARATIVE ANALYSIS SUMMARY")
+    print("="*70)
     
-    # Best performance in each metric
-    metrics_to_compare = ['mse', 'mae', 'r2']
+    config_names = list(results.keys())
+    n_configs = len(config_names)
     
-    for metric in metrics_to_compare:
-        if metric in results[experiment_names[0]]:
-            values = {name: results[name][metric] for name in experiment_names 
-                     if metric in results[name]}
+    print(f"\n🔬 EXPERIMENT OVERVIEW:")
+    print(f"   Total configurations: {n_configs}")
+    print(f"   Configuration names: {', '.join(config_names[:5])}")
+    if n_configs > 5:
+        print(f"   ... and {n_configs - 5} more")
+    
+    # Performance ranking
+    if any('mse' in result for result in results.values()):
+        print(f"\n🏆 PERFORMANCE RANKING (by MSE):")
+        mse_results = [(name, result['mse']) for name, result in results.items() if 'mse' in result]
+        mse_results.sort(key=lambda x: x[1])
+        
+        for rank, (name, mse) in enumerate(mse_results[:5], 1):
+            print(f"   {rank}. {name}: {mse:.6f}")
+        
+        if len(mse_results) > 5:
+            print(f"   ... and {len(mse_results) - 5} more configurations")
+        
+        # Performance spread
+        best_mse = mse_results[0][1]
+        worst_mse = mse_results[-1][1]
+        improvement_factor = worst_mse / best_mse if best_mse > 0 else float('inf')
+        print(f"\n📈 PERFORMANCE SPREAD:")
+        print(f"   Best MSE: {best_mse:.6f} ({mse_results[0][0]})")
+        print(f"   Worst MSE: {worst_mse:.6f} ({mse_results[-1][0]})")
+        print(f"   Improvement factor: {improvement_factor:.2f}x")
+    
+    # Parameter analysis
+    all_params = set()
+    for result in results.values():
+        all_params.update(result.keys())
+    
+    common_params = ['spectral_radius', 'n_reservoir', 'noise_level', 'leak_rate']
+    available_params = [p for p in common_params if p in all_params]
+    
+    if available_params:
+        print(f"\n⚙️ PARAMETER RANGES:")
+        for param in available_params:
+            values = [results[name].get(param) for name in config_names if param in results[name]]
+            values = [v for v in values if v is not None and not np.isnan(v)]
             
             if values:
-                if metric in ['mse', 'mae']:  # Lower is better
-                    best_name = min(values, key=values.get)
-                    best_value = values[best_name]
-                    print(f"🥇 Best {metric.upper()}: {best_name} ({best_value:.6f})")
-                elif metric == 'r2':  # Higher is better
-                    best_name = max(values, key=values.get)
-                    best_value = values[best_name]
-                    print(f"🥇 Best {metric.upper()}: {best_name} ({best_value:.4f})")
+                min_val, max_val = min(values), max(values)
+                mean_val = np.mean(values)
+                print(f"   {param}: [{min_val:.4f}, {max_val:.4f}] (mean: {mean_val:.4f})")
     
-    print("=" * 60)
+    print("="*70)
 
 
 def print_spectral_statistics(eigenvals: np.ndarray, 
-                             singular_vals: np.ndarray, 
+                             singular_vals: np.ndarray,
                              condition_number: float) -> None:
-    """Print spectral analysis statistics."""
-    print(f"\n🌈 Spectral Analysis Summary:")
-    print(f"=" * 50)
+    """
+    Print comprehensive spectral analysis statistics
     
-    # Eigenvalue properties
-    magnitudes = np.abs(eigenvals)
-    print(f"🔍 Eigenvalue Properties:")
-    print(f"   • Number of eigenvalues: {len(eigenvals)}")
-    print(f"   • Spectral radius: {np.max(magnitudes):.4f}")
-    print(f"   • Real eigenvalues: {np.sum(np.abs(eigenvals.imag) < 1e-10)}")
-    print(f"   • Complex eigenvalues: {np.sum(np.abs(eigenvals.imag) >= 1e-10)}")
-    print(f"   • Eigenvalues |λ| > 1: {np.sum(magnitudes > 1)}")
+    Args:
+        eigenvals: Eigenvalues of the matrix
+        singular_vals: Singular values of the matrix  
+        condition_number: Condition number of the matrix
+    """
+    print("\n" + "="*60)
+    print("🌈 SPECTRAL ANALYSIS STATISTICS")
+    print("="*60)
     
-    # Singular value properties
-    if len(singular_vals) > 0:
-        print(f"\n📊 Singular Value Properties:")
-        print(f"   • Largest singular value: {singular_vals[0]:.4f}")
-        print(f"   • Smallest singular value: {singular_vals[-1]:.2e}")
-        print(f"   • Condition number: {condition_number:.2e}")
-        print(f"   • Effective rank (1e-6): {np.sum(singular_vals / singular_vals[0] > 1e-6) if singular_vals[0] > 0 else 0}")
+    spectral_radius = np.max(np.abs(eigenvals))
     
-    # Stability assessment
-    print(f"\n⚖️  Stability Assessment:")
-    stability = assess_spectral_stability(eigenvals)
-    print(f"   • Overall stability: {stability}")
-    print(f"   • Numerical conditioning: {assess_condition_number(condition_number)}")
+    # Basic spectral properties
+    print(f"\n🎯 BASIC SPECTRAL PROPERTIES:")
+    print(f"   Matrix size: {int(np.sqrt(len(eigenvals)))} × {int(np.sqrt(len(eigenvals)))}")
+    print(f"   Number of eigenvalues: {len(eigenvals)}")
+    print(f"   Spectral radius: {spectral_radius:.6f}")
+    print(f"   Condition number: {condition_number:.2e}")
     
-    print("=" * 50)
+    # Eigenvalue analysis
+    complex_eigenvals = np.sum(np.abs(eigenvals.imag) > 1e-10)
+    real_eigenvals = len(eigenvals) - complex_eigenvals
+    
+    print(f"\n🧮 EIGENVALUE COMPOSITION:")
+    print(f"   Real eigenvalues: {real_eigenvals} ({real_eigenvals/len(eigenvals):.1%})")
+    print(f"   Complex eigenvalues: {complex_eigenvals} ({complex_eigenvals/len(eigenvals):.1%})")
+    print(f"   Dominant eigenvalue: {eigenvals[np.argmax(np.abs(eigenvals))]:.6f}")
+    
+    # Stability analysis
+    print(f"\n🎚️ STABILITY ANALYSIS:")
+    eigenvals_inside_unit = np.sum(np.abs(eigenvals) < 1.0)
+    eigenvals_on_boundary = np.sum(np.abs(np.abs(eigenvals) - 1.0) < 1e-6)
+    eigenvals_outside_unit = np.sum(np.abs(eigenvals) > 1.0)
+    
+    print(f"   Inside unit circle: {eigenvals_inside_unit} ({eigenvals_inside_unit/len(eigenvals):.1%})")
+    print(f"   On unit circle: {eigenvals_on_boundary} ({eigenvals_on_boundary/len(eigenvals):.1%})")
+    print(f"   Outside unit circle: {eigenvals_outside_unit} ({eigenvals_outside_unit/len(eigenvals):.1%})")
+    
+    # Echo State Property assessment
+    if spectral_radius < 0.95:
+        esp_status = "🟢 Strongly satisfied"
+    elif spectral_radius < 1.0:
+        esp_status = "🟡 Marginally satisfied"
+    else:
+        esp_status = "🔴 Violated"
+    
+    print(f"   Echo State Property: {esp_status}")
+    
+    # Singular value analysis
+    effective_rank = np.sum(singular_vals > 1e-10)
+    rank_ratio = effective_rank / len(singular_vals)
+    
+    print(f"\n📐 SINGULAR VALUE ANALYSIS:")
+    print(f"   Largest singular value: {singular_vals[0]:.6f}")
+    print(f"   Smallest singular value: {singular_vals[-1]:.2e}")
+    print(f"   Effective rank: {effective_rank} ({rank_ratio:.1%} of full rank)")
+    print(f"   Condition number: {condition_number:.2e}")
+    
+    # Condition number assessment
+    condition_assessment = assess_condition_number(condition_number)
+    print(f"   Numerical stability: {condition_assessment}")
+    
+    print("="*60)
 
 
 def assess_condition_number(condition_number: float) -> str:
-    """Assess numerical conditioning based on condition number."""
-    if np.isnan(condition_number) or np.isinf(condition_number):
-        return "Cannot determine"
+    """Assess numerical stability based on condition number"""
+    if condition_number < 1e3:
+        return "🟢 Excellent (well-conditioned)"
+    elif condition_number < 1e6:
+        return "🟡 Good (moderately conditioned)"
     elif condition_number < 1e12:
-        return "Well-conditioned"
-    elif condition_number < 1e15:
-        return "Moderately conditioned"
+        return "🟠 Fair (ill-conditioned)"
     else:
-        return "Ill-conditioned"
+        return "🔴 Poor (severely ill-conditioned)"
 
 
 def assess_spectral_stability(eigenvals: np.ndarray) -> str:
-    """Assess spectral stability."""
-    max_magnitude = np.max(np.abs(eigenvals))
+    """Assess overall spectral stability"""
+    spectral_radius = np.max(np.abs(eigenvals))
     
-    if max_magnitude < 0.9:
-        return "Highly stable"
-    elif max_magnitude < 1.0:
-        return "Stable (Echo state property)"
-    elif max_magnitude < 1.1:
-        return "Marginally stable"
+    if spectral_radius < 0.8:
+        return "🟢 Highly stable"
+    elif spectral_radius < 0.95:
+        return "🟢 Stable"
+    elif spectral_radius < 1.0:
+        return "🟡 Marginally stable"
+    elif spectral_radius < 1.1:
+        return "🟠 Unstable"
     else:
-        return "Unstable"
+        return "🔴 Highly unstable"
 
 
-# Export visualization functions
+# Export all visualization functions for backward compatibility
 __all__ = [
-    # Structure Visualization
+    # Structure visualization
     'visualize_reservoir_structure',
-    
-    # Dynamics Visualization
-    'visualize_reservoir_dynamics',
-    
-    # Performance Visualization
-    'visualize_performance_analysis',
-    
-    # Comparative Analysis
-    'visualize_comparative_analysis',
-    
-    # Spectral Analysis
-    'visualize_spectral_analysis',
-    
-    # Animation
-    'create_reservoir_animation',
-    
-    # Statistics Utilities
     'print_reservoir_statistics',
-    'print_dynamics_statistics', 
+    
+    # Dynamics visualization  
+    'visualize_reservoir_dynamics',
+    'print_dynamics_statistics',
+    
+    # Performance visualization
+    'visualize_performance_analysis', 
     'print_performance_statistics',
+    
+    # Comparative analysis
+    'visualize_comparative_analysis',
     'print_comparative_summary',
+    
+    # Spectral analysis
+    'visualize_spectral_analysis',
     'print_spectral_statistics',
+    
+    # Animation and utilities
+    'create_reservoir_animation',
     'assess_condition_number',
     'assess_spectral_stability'
 ]
