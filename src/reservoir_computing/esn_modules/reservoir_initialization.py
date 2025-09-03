@@ -74,7 +74,7 @@ class ReservoirInitializationMixin:
         #      
         #      def test_state_convergence(self, W: np.ndarray, n_inputs: int = 1,
         #                               test_length: int = 200) -> bool:
-        #          """Test if states converge from different initial conditions"""
+        #          # Test if states converge from different initial conditions
         #          # Generate test input sequence
         #          u_test = np.random.randn(test_length, n_inputs)
         #          

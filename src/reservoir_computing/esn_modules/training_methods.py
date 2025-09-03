@@ -30,7 +30,7 @@ class TrainingMethodsMixin:
         #    - CODE REVIEW SUGGESTION - Implement complete Jaeger training procedure:
         #      ```python
         #      def train_jaeger_complete(self, X_train, y_train, validate_esp=True):
-        #          """Complete training procedure from Jaeger (2001) Section 3.2"""
+        #          # Complete training procedure from Jaeger (2001) Section 3.2"""
         #          # Step 1: Validate Echo State Property
         #          if validate_esp and not self._validate_echo_state_property():
         #              raise ValueError("Network does not satisfy Echo State Property")
@@ -49,7 +49,7 @@ class TrainingMethodsMixin:
         #          self.output_weights = self._solve_linear_system(augmented_states, y_target)
         #      
         #      def _validate_echo_state_property(self) -> bool:
-        #          """Validate ESP using fading memory criterion"""
+        #          # Validate ESP using fading memory criterion"""
         #          # Test with two different input sequences
         #          test_length = 100
         #          u1 = np.random.randn(test_length, self.esn.n_inputs)
@@ -70,7 +70,7 @@ class TrainingMethodsMixin:
         #    - CODE REVIEW SUGGESTION - Apply inverse output transformation:
         #      ```python
         #      def _apply_inverse_output_function(self, targets: np.ndarray) -> np.ndarray:
-        #          """Apply (f^out)^(-1) transformation per Equation 11"""
+        #          # Apply (f^out)^(-1) transformation per Equation 11"""
         #          output_func = getattr(self.esn, 'output_function', 'linear')
         #          
         #          if output_func == 'tanh':
@@ -88,7 +88,7 @@ class TrainingMethodsMixin:
         #              return targets
         #      
         #      def _compute_jaeger_mse(self, predictions: np.ndarray, targets: np.ndarray) -> float:
-        #          """Compute MSE using Jaeger's formula from Equation 11"""
+        #          # Compute MSE using Jaeger's formula from Equation 11"""
         #          # Apply inverse output transformation to targets
         #          targets_transformed = self._apply_inverse_output_function(targets)
         #          
