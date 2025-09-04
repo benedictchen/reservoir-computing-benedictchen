@@ -364,7 +364,7 @@ class TestErrorHandling:
         # Reservoir size should be positive
         with pytest.raises((ValueError, AssertionError)):
             EchoStateNetwork(n_reservoir=0)
-    
+
     def test_mismatched_dimensions(self):
         """Test handling of mismatched input dimensions"""
         esn = EchoStateNetwork(n_reservoir=100, n_inputs=3)
@@ -374,7 +374,7 @@ class TestErrorHandling:
         
         with pytest.raises((ValueError, AssertionError)):
             esn.compute_reservoir_states(wrong_input)
-    
+
     def test_empty_data(self):
         """Test handling of empty or invalid data"""
         esn = EchoStateNetwork(n_reservoir=50, n_inputs=2)

@@ -26,8 +26,8 @@ from .core_modules.echo_state_network import EchoStateNetwork
 # ═══════════════════════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Import real implementations - NO MORE FAKE CODE
-from .advanced_esn_implementations import (
+# Import real implementations - Research implementations
+from .deep_esn_implementations import (
     DeepEchoStateNetwork,
     OnlineEchoStateNetwork, 
     create_echo_state_network,
@@ -54,12 +54,12 @@ __all__ = [
     'TrainingMixin', 
     'PredictionMixin',
     
-    # Network classes - ALL REAL IMPLEMENTATIONS (NO MORE FAKE CODE)
+    # Network classes - ALL ImplementationS (Research implementations)
     'EchoStateNetwork',
     'DeepEchoStateNetwork',      # ✅ REAL: Multiple reservoir layers
     'OnlineEchoStateNetwork',    # ✅ REAL: RLS online training
     
-    # Factory functions - ALL REAL IMPLEMENTATIONS  
+    # Factory functions - ALL ImplementationS  
     'create_echo_state_network',      # ✅ REAL: Task-specific ESN creation
     'optimize_esn_hyperparameters',   # ✅ REAL: Bayesian optimization
     

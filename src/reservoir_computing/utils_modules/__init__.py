@@ -150,8 +150,8 @@ MODULE_INFO = {
 }
 
 def print_module_info():
-    """📊 Print module information and migration success metrics"""
-    print("🏗️ Utils Modules - Migration Success Report")
+    """📊 Print module information"""
+    print("🏗️ Utils Modules - Information")
     print("=" * 50)
     for key, value in MODULE_INFO.items():
         print(f"{key.replace('_', ' ').title()}: {value}")

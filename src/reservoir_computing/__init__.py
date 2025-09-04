@@ -61,11 +61,11 @@ from .core import (
     
     # ═══════════════════════════════════════════════════════════════════════════
     # ═══════════════════════════════════════════════════════════════════════════
-    # ALL REAL IMPLEMENTATIONS - NO MORE FAKE CODE
+    # ALL ImplementationS - Research implementations
     DeepEchoStateNetwork,      # ✅ REAL: Multiple reservoir layers
     OnlineEchoStateNetwork,    # ✅ REAL: RLS online training
     
-    # Factory Functions - ALL REAL IMPLEMENTATIONS  
+    # Factory Functions - ALL ImplementationS  
     create_echo_state_network,      # ✅ REAL: Task-specific ESN creation
     optimize_esn_hyperparameters,   # ✅ REAL: Bayesian optimization
     

@@ -1,5 +1,5 @@
 """
-Echo State Property Validation for ESN - COMPLETE RESEARCH-ACCURATE IMPLEMENTATION
+Echo State Property Validation for ESN - Complete research-accurate implementation
 """
 
 import numpy as np
