@@ -146,7 +146,7 @@ class ConfigurationHelpersMixin(ABC):
         - **relu**: Rectified Linear Unit, range [0, ∞]
         - **leaky_relu**: Leaky ReLU with small negative slope
         - **linear**: Identity function, range (-∞, ∞)
-        - **custom**: User-defined function
+        - **custom**: Custom activation function
         
         Technical Implementation:
         ========================

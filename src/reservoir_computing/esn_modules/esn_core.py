@@ -59,7 +59,7 @@ class EchoStateNetwork(
     """
     Modular Echo State Network Implementation
     
-    🌊 Revolutionary Reservoir Computing Architecture
+    🌊 Reservoir Computing Architecture
     
     Based on Herbert Jaeger's groundbreaking 2001 paper, this implementation
     provides a complete, research-grade Echo State Network with modular
